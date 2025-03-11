@@ -1,5 +1,6 @@
 defmodule SortedMapTest do
   use ExUnit.Case
+  alias OrderedCollections.SortedMap
   doctest SortedMap
 
   test "creates an empty map" do

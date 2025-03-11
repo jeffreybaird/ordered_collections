@@ -1,11 +1,13 @@
-defmodule SortedMap do
+defmodule OrderedCollections.SortedMap do
+  alias __MODULE__, as: SortedMap
+
   @moduledoc """
   A sorted key-value store implemented using Erlang's `:gb_trees` (Red-Black Trees).
 
   This module stores items in sorted order by their keys.
   """
 
-  @opaque t :: %SortedMap{tree: :gb_trees.tree()}
+  @opaque t :: %OrderedCollections.SortedMap{tree: :gb_trees.tree()}
   defstruct tree: :gb_trees.empty()
 
   @doc """
@@ -17,8 +19,8 @@ defmodule SortedMap do
       iex> SortedMap.to_map(sm)
       %{}
   """
-  @spec new() :: SortedMap.t()
-  def new(), do: %SortedMap{}
+  @spec new() :: OrderedCollections.SortedMap.t()
+  def new(), do: %__MODULE__{}
 
   @doc """
   Creates a new sorted map from a standard map.
