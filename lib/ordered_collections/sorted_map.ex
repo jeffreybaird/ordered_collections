@@ -91,44 +91,118 @@ defmodule SortedMap do
     end
   end
 
-  @doc "Checks if a key exists."
+  @doc """
+  Checks if a key exists.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{a: 1, b: 2})
+      iex> SortedMap.has_key?(sm, :a)
+      true
+      iex> SortedMap.has_key?(sm, :c)
+      false
+  """
   @spec has_key?(SortedMap.t(), any()) :: boolean()
   def has_key?(%SortedMap{tree: tree}, key), do: :gb_trees.is_defined(key, tree)
 
+  @doc """
+  Deletes a key.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{a: 1, b: 2})
+      iex> sm2 = SortedMap.delete(sm, :b)
+      iex> SortedMap.has_key?(sm2, :b)
+      false
+  """
   @spec delete(SortedMap.t(), any()) :: SortedMap.t()
-  @doc "Deletes a key."
   def delete(%SortedMap{tree: tree} = map, key) do
     %SortedMap{map | tree: :gb_trees.delete_any(key, tree)}
   end
 
+  @doc """
+  Returns the smallest key. Returns `:none` if the map is empty.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{b: 2, a: 1, c: 3})
+      iex> SortedMap.min_key(sm)
+      :a
+
+      iex> sm_empty = SortedMap.new()
+      iex> SortedMap.min_key(sm_empty)
+      :none
+  """
   @spec min_key(SortedMap.t()) :: any()
-  @doc "Returns the smallest key."
   def min_key(%SortedMap{tree: tree}) do
-    case :gb_trees.smallest(tree) do
-      {key, _val} -> key
-      _ -> nil
+    if :gb_trees.is_empty(tree) do
+      :none
+    else
+      {key, _val} = :gb_trees.smallest(tree)
+      key
     end
   end
 
+  @doc """
+  Returns the largest key. Returns `:none` if the map is empty.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{b: 2, a: 1, c: 3})
+      iex> SortedMap.max_key(sm)
+      :c
+
+      iex> sm_empty = SortedMap.new()
+      iex> SortedMap.max_key(sm_empty)
+      :none
+  """
   @spec max_key(SortedMap.t()) :: any()
-  @doc "Returns the largest key."
   def max_key(%SortedMap{tree: tree}) do
-    case :gb_trees.largest(tree) do
-      {key, _val} -> key
-      _ -> nil
+    if :gb_trees.is_empty(tree) do
+      :none
+    else
+      case :gb_trees.largest(tree) do
+        {key, _val} -> key
+        _ -> nil
+      end
     end
   end
 
+  @doc """
+  Returns all key-value pairs in sorted order.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{b: 2, a: 1})
+      iex> SortedMap.to_list(sm)
+      [{:a, 1}, {:b, 2}]
+  """
   @spec to_list(SortedMap.t()) :: [{any(), any()}]
-  @doc "Returns all key-value pairs in sorted order."
   def to_list(%SortedMap{tree: tree}), do: :gb_trees.to_list(tree)
 
-  @spec to_map(SortedMap.t()) :: any()
-  @doc "Converts the SortedMap into a standard Map (losing order)."
+  @doc """
+  Converts the `SortedMap` into a standard `Map`, losing the sorted property.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{b: 2, a: 1})
+      iex> SortedMap.to_map(sm)
+      %{a: 1, b: 2}
+  """
+  @spec to_map(SortedMap.t()) :: map()
   def to_map(%SortedMap{tree: tree}), do: Enum.into(:gb_trees.to_list(tree), %{})
 
-  @spec range(SortedMap.t(), any(), any()) :: list()
-  @doc "Iterates over a range of keys."
+  @doc """
+  Iterates over a range of keys, returning key-value pairs
+  whose keys are between `min` and `max` (inclusive).
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{a: 1, b: 2, c: 3, d: 4})
+      iex> SortedMap.range(sm, :b, :c)
+      [{:b, 2}, {:c, 3}]
+  """
+  @spec range(SortedMap.t(), any(), any()) :: [{any(), any()}]
   def range(%SortedMap{tree: tree}, min, max) do
     tree
     |> :gb_trees.to_list()
