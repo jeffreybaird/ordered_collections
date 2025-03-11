@@ -1,5 +1,6 @@
 defmodule SortedMapTest do
   use ExUnit.Case
+  doctest SortedMap
 
   test "creates an empty map" do
     assert SortedMap.new() |> SortedMap.to_list() == []
