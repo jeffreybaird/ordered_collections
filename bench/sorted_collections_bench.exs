@@ -1,6 +1,7 @@
 # bench/sorted_collections_bench.exs
 Mix.Task.run("app.start")
 alias OrderedCollections.SortedMap
+alias OrderedCollections.SortedSet
 
 # Prepare sample data for the benchmark
 keys = Enum.to_list(1..10_000)
@@ -109,3 +110,21 @@ Benchee.run(%{
   "SortedMap Lookup" => sorted_map_lookup,
   "gb_trees Lookup" => gb_tree_lookup,
 })
+
+IO.puts("=== SET Delete Operations ===")
+Benchee.run( %{
+    "Delete - SortedSet" => sorted_set_delete,
+    "Delete - :gb_sets" => gb_set_delete
+  })
+
+IO.puts("=== SET Insert Operations ===")
+Benchee.run(%{
+    "Insert - SortedSet" => sorted_set_insert,
+    "Insert - :gb_sets" => gb_set_insert
+  })
+
+IO.puts("=== SET Lookup Operations ===")
+Benchee.run(%{
+    "SortedSet Lookup" => sorted_set_lookup,
+    ":gb_sets Lookup" => gb_set_lookup
+  })
