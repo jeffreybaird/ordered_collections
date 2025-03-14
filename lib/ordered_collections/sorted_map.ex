@@ -7,7 +7,7 @@ defmodule OrderedCollections.SortedMap do
   This module stores items in sorted order by their keys.
   """
 
-  @opaque t :: %OrderedCollections.SortedMap{tree: :gb_trees.tree()}
+  @type t :: %SortedMap{tree: :gb_trees.tree()}
   defstruct tree: :gb_trees.empty()
 
   @doc """
@@ -19,7 +19,7 @@ defmodule OrderedCollections.SortedMap do
       iex> SortedMap.to_map(sm)
       %{}
   """
-  @spec new() :: OrderedCollections.SortedMap.t()
+  @spec new() :: SortedMap.t()
   def new(), do: %__MODULE__{}
 
   @doc """
@@ -55,22 +55,82 @@ defmodule OrderedCollections.SortedMap do
   end
 
   @doc """
-  Updates a key if it exists, otherwise sets a default value.
+  Updates a key with a function. If the key doesn’t exist,
+  it is set to `nil`.
 
   ## Examples
 
       iex> sm = SortedMap.new(%{a: 1})
-      iex> SortedMap.update(sm, :a, fn val -> val + 1 end) |> SortedMap.get(:a)
+      iex> sm = SortedMap.update(sm, :a, &(&1 + 1))
+      iex> SortedMap.get(sm, :a)
       2
 
-      iex> SortedMap.new(%{a: 1}) |> SortedMap.update(:b, fn val -> val + 1 end, 10) |> SortedMap.get(:b)
+      iex> SortedMap.new(%{a: 1}) |> SortedMap.update(:b, &(&1 + 1)) |> SortedMap.get(:b)
+      nil
+  """
+
+  # --------------------------------------------------------------------
+  #   1) update/3 — No default. If the key doesn’t exist, use `nil`.
+  # --------------------------------------------------------------------
+  @spec update(t(), any(), (any() -> any())) :: t()
+  def update(%__MODULE__{} = map, key, fun) do
+    case get(map, key) do
+      nil -> put(map, key, nil)
+      val -> put(map, key, fun.(val))
+    end
+  end
+
+  # --------------------------------------------------------------------
+  #   2) update/4 — Takes an explicit default if key doesn’t exist.
+  # --------------------------------------------------------------------
+
+  @doc """
+  Updates a key with a function. If the key doesn’t exist,
+  it sets it to `default`.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{a: 1})
+      iex> sm = SortedMap.update(sm, :a, &(&1 + 5), 0)
+      iex> SortedMap.get(sm, :a)
+      6
+
+      iex> SortedMap.new(%{a: 1}) |> SortedMap.update(:b, &(&1 + 1), 10) |> SortedMap.get(:b)
       10
   """
-  @spec update(SortedMap.t(), any(), (any() -> any()), any()) :: SortedMap.t()
-  def update(%SortedMap{} = map, key, fun, default \\ nil) do
+  @spec update(t(), any(), (any() -> any()), any()) :: t()
+  def update(%__MODULE__{} = map, key, fun, default) do
     case get(map, key) do
       nil -> put(map, key, default)
       val -> put(map, key, fun.(val))
+    end
+  end
+
+  # --------------------------------------------------------------------
+  #   3) update_value/3 — Replaces the current value if key exists,
+  #      otherwise does nothing.
+  # --------------------------------------------------------------------
+
+  @doc """
+  Replaces the value for `key` with `new_value` if the key exists.
+  If `key` does not exist, the map remains unchanged.
+
+  ## Examples
+
+      iex> sm = SortedMap.new(%{a: 1, b: 2})
+      iex> sm = SortedMap.update_with_value(sm, :a, 100)
+      iex> SortedMap.get(sm, :a)
+      100
+      iex> SortedMap.update_with_value(sm, :c, 300)
+      iex> SortedMap.get(sm, :c)
+      nil
+  """
+  @spec update_with_value(t(), any(), any()) :: t()
+  def update_with_value(%__MODULE__{} = map, key, new_value) do
+    if has_key?(map, key) do
+      put(map, key, new_value)
+    else
+      map
     end
   end
 
@@ -163,10 +223,8 @@ defmodule OrderedCollections.SortedMap do
     if :gb_trees.is_empty(tree) do
       :none
     else
-      case :gb_trees.largest(tree) do
-        {key, _val} -> key
-        _ -> nil
-      end
+      {key, _val} = :gb_trees.largest(tree)
+      key
     end
   end
 
