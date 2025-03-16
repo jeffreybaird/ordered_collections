@@ -63,17 +63,56 @@ Elixir 1.18.3
 Erlang 27.2.4
 JIT enabled: true
 
-| **Operation**    | **Structure** | **IPS**   | **Avg (ms)** | **Comparison**                           |
-|------------------|---------------|-----------|--------------|------------------------------------------|
-| **Map Delete**   | gb_trees      | 262.38    | 3.81         | –                                        |
-|                  | SortedMap     | 226.38    | 4.42         | 1.16× slower, +0.61 ms                   |
-| **Map Insert**   | gb_trees      | 342.90    | 2.92         | –                                        |
-|                  | SortedMap     | 293.90    | 3.40         | 1.17× slower, +0.49 ms                   |
-| **Map Lookup**   | gb_trees      | 308.63    | 3.24         | –                                        |
-|                  | SortedMap     | 257.60    | 3.88         | 1.20× slower, +0.64 ms                   |
-| **Set Delete**   | :gb_sets      | 300.08    | 3.33         | –                                        |
-|                  | SortedSet     | 298.92    | 3.35         | 1.00× slower, +0.013 ms                  |
-| **Set Insert**   | :gb_sets      | 520.44    | 1.92         | –                                        |
-|                  | SortedSet     | 516.41    | 1.94         | 1.01× slower, +0.015 ms                  |
-| **Set Lookup**   | :gb_sets      | 407.20    | 2.46         | –                                        |
-|                  | SortedSet     | 373.51    | 2.68         | 1.09× slower, +0.22 ms                   |
+## Benchmark Results
+
+The table below summarizes performance benchmarks comparing operations on different data structures. These benchmarks were run on macOS (Apple M3, 8 cores, 16 GB memory) using Elixir 1.18.3 and Erlang 27.2.4 with JIT enabled. The measurements show IPS (Iterations Per Second), average execution times, and a comparison between implementations.
+
+### Delete Operations (Key-Value Stores)
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Delete           | gb_trees         | 1.11 K  | 901.71 μs        | ±7.36%       | 885.04 μs    | 1129.99 μs          | —                             |
+| Delete           | SortedMap        | 1.02 K  | 985.20 μs        | ±4.89%       | 972.92 μs    | 1198.37 μs          | 1.09× slower (+83.48 μs)       |
+
+### Insert Operations (Key-Value Stores)
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Insert           | gb_trees         | 348.54  | 2.87 ms          | ±12.31%      | 2.85 ms      | 3.71 ms             | —                             |
+| Insert           | SortedMap        | 298.88  | 3.35 ms          | ±9.82%       | 3.38 ms      | 4.21 ms             | 1.17× slower (+0.48 ms)       |
+
+### Lookup Operations (Key-Value Stores)
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Lookup           | gb_trees         | 2.73 K  | 366.81 μs        | ±9.90%       | 361.96 μs    | 446.20 μs           | —                             |
+| Lookup           | SortedMap        | 2.35 K  | 425.65 μs        | ±18.01%      | 415.50 μs    | 508.36 μs           | 1.16× slower (+58.84 μs)       |
+
+### Range Operations (Key-Value Stores)
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Range            | SortedMap        | 8.85 K  | 113.04 μs        | ±3.73%       | 112.21 μs    | 130.50 μs           | —                             |
+| Range            | gb_trees         | 8.39 K  | 119.25 μs        | ±32.45%      | 118.08 μs    | 136.58 μs           | 1.05× slower (+6.20 μs)        |
+| Range            | Elixir (naive)   | 5.67 K  | 176.34 μs        | ±12.57%      | 173.63 μs    | 220.07 μs           | 1.56× slower (+63.29 μs)       |
+
+### SET (Unique Elements) Delete Operations
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Delete           | SortedSet        | 684.77  | 1.46 ms          | ±4.06%       | 1.45 ms      | 1.67 ms             | —                             |
+| Delete           | :gb_sets         | 684.39  | 1.46 ms          | ±4.65%       | 1.46 ms      | 1.68 ms             | ~Same performance             |
+
+### SET (Unique Elements) Insert Operations
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Insert           | :gb_sets         | 554.92  | 1.80 ms          | ±7.06%       | 1.80 ms      | 2.15 ms             | —                             |
+| Insert           | SortedSet        | 511.32  | 1.96 ms          | ±10.78%      | 1.92 ms      | 2.46 ms             | 1.09× slower (+0.154 ms)       |
+
+### SET (Unique Elements) Lookup Operations
+
+| **Operation**    | **Structure**    | **IPS** | **Average Time** | **Deviation** | **Median**   | **99th Percentile** | **Comparison**                |
+|------------------|------------------|---------|------------------|---------------|--------------|---------------------|-------------------------------|
+| Lookup           | :gb_sets         | 1.68 K  | 593.48 μs        | ±5.98%       | 586.30 μs    | 708.54 μs           | —                             |
+| Lookup           | SortedSet        | 1.62 K  | 617.83 μs        | ±4.29%       | 614.80 μs    | 742.15 μs           | 1.04× slower (+24.36 μs)       |

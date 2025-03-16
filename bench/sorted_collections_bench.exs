@@ -30,19 +30,10 @@ sorted_map_insert = fn ->
   end)
 end
 
-sorted_map_lookup = fn ->
-  map = sorted_map_insert.()
-
-  Enum.each(keys, fn k ->
-    SortedMap.get(map, k)
-  end)
-end
-
-sorted_map_delete = fn ->
-  map = sorted_map_insert.()
-
-  Enum.each(keys, fn k ->
-    _ = SortedMap.delete(map, k)
+# Benchmark functions for gb_trees directly
+gb_tree_insert = fn ->
+  Enum.reduce(values, :gb_trees.empty(), fn {k, v}, acc ->
+    :gb_trees.insert(k, v, acc)
   end)
 end
 
@@ -53,50 +44,41 @@ unsorted_map_insert =
     end)
   end
 
-# Benchmark functions for gb_trees directly
-gb_tree_insert = fn ->
-  Enum.reduce(values, :gb_trees.empty(), fn {k, v}, acc ->
-    :gb_trees.insert(k, v, acc)
+map = unsorted_map_insert.()
+sorted_map = sorted_map_insert.()
+gb_list = gb_tree_insert.()
+
+sorted_map_lookup = fn map ->
+  Enum.each(keys, fn k ->
+    SortedMap.get(map, k)
   end)
 end
 
-gb_tree_lookup = fn ->
-  tree = gb_tree_insert.()
+sorted_map_delete = fn map ->
+  Enum.each(keys, fn k ->
+    _ = SortedMap.delete(map, k)
+  end)
+end
 
+gb_tree_lookup = fn tree ->
   Enum.each(keys, fn k ->
     _ = :gb_trees.lookup(k, tree)
   end)
 end
 
-gb_tree_delete = fn ->
-  tree = gb_tree_insert.()
+gb_tree_delete = fn tree ->
   Enum.each(keys, fn k ->
     _ = :gb_trees.delete_any(k, tree)
   end)
 end
 
 # Similarly for SortedSet vs :gb_sets:
-set_values = Enum.shuffle(keys)  # to simulate unsorted insertion
+# to simulate unsorted insertion
+set_values = Enum.shuffle(keys)
 
 sorted_set_insert = fn ->
   Enum.reduce(set_values, SortedSet.new(), fn k, acc ->
     SortedSet.add(acc, k)
-  end)
-end
-
-sorted_set_lookup = fn ->
-  set = sorted_set_insert.()
-
-  Enum.each(set_values, fn k ->
-    SortedSet.member?(set, k)
-  end)
-end
-
-sorted_set_delete = fn ->
-  set = sorted_set_insert.()
-
-  Enum.each(set_values, fn k ->
-    _ = SortedSet.delete(set, k)
   end)
 end
 
@@ -106,17 +88,28 @@ gb_set_insert = fn ->
   end)
 end
 
-gb_set_lookup = fn ->
-  set = gb_set_insert.()
+sorted_set = sorted_set_insert.()
+gb_set = gb_set_insert.()
 
+sorted_set_lookup = fn set ->
+  Enum.each(set_values, fn k ->
+    SortedSet.member?(set, k)
+  end)
+end
+
+gb_set_lookup = fn set ->
   Enum.each(set_values, fn k ->
     :gb_sets.is_member(k, set)
   end)
 end
 
-gb_set_delete = fn ->
-  set = gb_set_insert.()
+sorted_set_delete = fn set ->
+  Enum.each(set_values, fn k ->
+    _ = SortedSet.delete(set, k)
+  end)
+end
 
+gb_set_delete = fn set ->
   Enum.each(set_values, fn k ->
     _ = :gb_sets.delete_any(k, set)
   end)
@@ -126,8 +119,8 @@ end
 IO.puts("=== Delete Operations ===")
 
 Benchee.run(%{
-  "Delete - SortedMap" => sorted_map_delete,
-  "Delete - gb_trees" => gb_tree_delete
+  "Delete - SortedMap" => fn -> sorted_map_delete.(sorted_map) end,
+  "Delete - gb_trees" => fn -> gb_tree_delete.(gb_list) end
 })
 
 IO.puts("=== Insert Operations ===")
@@ -140,13 +133,9 @@ Benchee.run(%{
 IO.puts("=== Lookup Operations ===")
 
 Benchee.run(%{
-  "SortedMap Lookup" => sorted_map_lookup,
-  "gb_trees Lookup" => gb_tree_lookup
+  "SortedMap Lookup" => fn -> sorted_map_lookup.(sorted_map) end,
+  "gb_trees Lookup" => fn -> gb_tree_lookup.(gb_list) end
 })
-
-map = unsorted_map_insert.()
-sorted_map = sorted_map_insert.()
-gb_list = gb_tree_insert.()
 
 IO.puts("=== Range Operations ===")
 
@@ -161,8 +150,8 @@ Benchee.run(%{
 IO.puts("=== SET Delete Operations ===")
 
 Benchee.run(%{
-  "Delete - SortedSet" => sorted_set_delete,
-  "Delete - :gb_sets" => gb_set_delete
+  "Delete - SortedSet" => fn -> sorted_set_delete.(sorted_set) end,
+  "Delete - :gb_sets" => fn -> gb_set_delete.(gb_set) end
 })
 
 IO.puts("=== SET Insert Operations ===")
@@ -175,6 +164,6 @@ Benchee.run(%{
 IO.puts("=== SET Lookup Operations ===")
 
 Benchee.run(%{
-  "SortedSet Lookup" => sorted_set_lookup,
-  ":gb_sets Lookup" => gb_set_lookup
+  "SortedSet Lookup" => fn -> sorted_set_lookup.(sorted_set) end,
+  ":gb_sets Lookup" => fn -> gb_set_lookup.(gb_set) end
 })
