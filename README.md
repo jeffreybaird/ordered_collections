@@ -4,9 +4,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
 
 **OrderedCollections** is a library for Elixir that provides efficient, sorted data structures:
 
-## Why Use `SortedMap` and `SortedSet`?
-
-Sometimes you need your maps and sets sorted and you don't want to manually sort it every time. `SortedMap` and `SortedSet` wrap Erlang’s `:gb_trees` and `:gb_sets` and provide a way to store data in a structured, ordered way while keeping it in Elixir. If you ever find yourself sorting a map after every operation, this might save you some trouble.
+`SortedMap` and `SortedSet` wrap Erlang’s `:gb_trees` and `:gb_sets` for easy use in Elixir.
 
 ## Features
 
