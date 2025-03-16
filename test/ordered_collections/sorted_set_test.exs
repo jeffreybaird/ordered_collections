@@ -107,4 +107,40 @@ defmodule SortedSetTest do
     set = SortedSet.new()
     assert SortedSet.range(set, 1, 5) == []
   end
+
+  test "combines two sets" do
+    set1 = SortedSet.new([1, 2, 3])
+    set2 = SortedSet.new([3, 4, 5])
+    assert SortedSet.union(set1, set2) |> SortedSet.to_list() == [1, 2, 3, 4, 5]
+  end
+
+  test "combines two empty sets" do
+    set1 = SortedSet.new()
+    set2 = SortedSet.new()
+    assert SortedSet.union(set1, set2) |> SortedSet.to_list() == []
+  end
+
+  test "one set is empty" do
+    set1 = SortedSet.new([1, 2, 3])
+    set2 = SortedSet.new()
+    assert SortedSet.union(set1, set2) |> SortedSet.to_list() == [1, 2, 3]
+  end
+
+  test "difference between two sets" do
+    set1 = SortedSet.new([1, 2, 3])
+    set2 = SortedSet.new([3, 4, 5])
+    assert SortedSet.difference(set1, set2) |> SortedSet.to_list() == [1, 2]
+  end
+
+  test "difference between two empty sets" do
+    set1 = SortedSet.new()
+    set2 = SortedSet.new()
+    assert SortedSet.difference(set1, set2) |> SortedSet.to_list() == []
+  end
+
+  test "difference between a set and an empty set" do
+    set1 = SortedSet.new([1, 2, 3])
+    set2 = SortedSet.new()
+    assert SortedSet.difference(set1, set2) |> SortedSet.to_list() == [1, 2, 3]
+  end
 end

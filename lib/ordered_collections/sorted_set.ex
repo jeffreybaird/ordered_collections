@@ -160,4 +160,34 @@ defmodule OrderedCollections.SortedSet do
     end)
     |> Enum.reverse()
   end
+
+  @doc """
+  Returns a new SortedSet that is the union of two SortedSets.
+
+  ## Examples
+
+      iex> set1 = OrderedCollections.SortedSet.new([1, 3, 5])
+      iex> set2 = OrderedCollections.SortedSet.new([2, 3, 4])
+      iex> OrderedCollections.SortedSet.union(set1, set2) |> OrderedCollections.SortedSet.to_list()
+      [1, 2, 3, 4, 5]
+  """
+  @spec union(SortedSet.t(), SortedSet.t()) :: SortedSet.t()
+  def union(%SortedSet{set: s1}, %SortedSet{set: s2}) do
+    %SortedSet{set: :gb_sets.union(s1, s2)}
+  end
+
+  @doc """
+  Returns a new SortedSet that contains elements in the first set that are not present in the second.
+
+  ## Examples
+
+      iex> set1 = OrderedCollections.SortedSet.new([1, 2, 3, 4, 5])
+      iex> set2 = OrderedCollections.SortedSet.new([2, 4])
+      iex> OrderedCollections.SortedSet.difference(set1, set2) |> OrderedCollections.SortedSet.to_list()
+      [1, 3, 5]
+  """
+  @spec difference(SortedSet.t(), SortedSet.t()) :: SortedSet.t()
+  def difference(%SortedSet{set: s1}, %SortedSet{set: s2}) do
+    %SortedSet{set: :gb_sets.subtract(s1, s2)}
+  end
 end

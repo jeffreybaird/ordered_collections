@@ -6,7 +6,7 @@ defmodule OrderedCollections do
   ## Modules
 
     - `OrderedCollections.SortedMap` - A sorted key-value store implemented using Erlang's `:gb_trees`.
-    - `OrderedCollections.SortedSet` - A sorted set implemented using Erlang's `:gb_sets` (coming soon).
+    - `OrderedCollections.SortedSet` - A sorted set implemented using Erlang's `:gb_sets`.
 
   ## Examples
 
