@@ -37,17 +37,13 @@ end
 
 Run on my local machine:
 
-Operating System: macOS
-CPU Information: Apple M3
-Number of Available Cores: 8
-Available memory: 16 GB
-Elixir 1.18.3
-Erlang 27.2.4
-JIT enabled: true
-
-## Benchmark Results
-
-The table below summarizes performance benchmarks comparing operations on different data structures. These benchmarks were run on macOS (Apple M3, 8 cores, 16 GB memory) using Elixir 1.18.3 and Erlang 27.2.4 with JIT enabled. The measurements show IPS (Iterations Per Second), average execution times, and a comparison between implementations.
+- Operating System: macOS
+- CPU Information: Apple M3
+- Number of Available Cores: 8
+- Available memory: 16 GB
+- Elixir 1.18.3
+- Erlang 27.2.4
+- JIT enabled: true
 
 ### Delete Operations (Key-Value Stores)
 
