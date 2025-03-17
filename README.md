@@ -13,6 +13,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Fast lookups using `:gb_trees`
   - Range queries over keys.
   - Conversion to standard Elixir `Map` or list.
+  - Implements `Enum` and `Collectable`
 
 - **SortedSet**
   - Maintain a set of unique elements in sorted order.
@@ -20,6 +21,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Union, intersection, and difference operations.
   - Range queries over elements.
   - Conversion to a standard Elixir `MapSet` or list.
+  - Implements `Enum` and `Collectable`
 
 ## Installation
 
@@ -34,6 +36,8 @@ end
 ```
 
 ## Benchmarks
+
+Tested with a `SortedSet` with 10_000 integers and a `SortedMap` with 10_000 elements
 
 Run on my local machine:
 

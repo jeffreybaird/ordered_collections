@@ -69,9 +69,6 @@ defmodule OrderedCollections.SortedMap do
       nil
   """
 
-  # --------------------------------------------------------------------
-  #   1) update/3 — No default. If the key doesn’t exist, use `nil`.
-  # --------------------------------------------------------------------
   @spec update(t(), any(), (any() -> any())) :: t()
   def update(%__MODULE__{} = map, key, fun) do
     case get(map, key) do
@@ -79,10 +76,6 @@ defmodule OrderedCollections.SortedMap do
       val -> put(map, key, fun.(val))
     end
   end
-
-  # --------------------------------------------------------------------
-  #   2) update/4 — Takes an explicit default if key doesn’t exist.
-  # --------------------------------------------------------------------
 
   @doc """
   Updates a key with a function. If the key doesn’t exist,
@@ -105,11 +98,6 @@ defmodule OrderedCollections.SortedMap do
       val -> put(map, key, fun.(val))
     end
   end
-
-  # --------------------------------------------------------------------
-  #   3) update_value/3 — Replaces the current value if key exists,
-  #      otherwise does nothing.
-  # --------------------------------------------------------------------
 
   @doc """
   Replaces the value for `key` with `new_value` if the key exists.

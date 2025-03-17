@@ -61,12 +61,16 @@ defmodule OrderedCollections.SortedSet do
 
       iex> set = OrderedCollections.SortedSet.new([2, 3])
       iex> set = OrderedCollections.SortedSet.add(set, 1)
+      iex> set = OrderedCollections.SortedSet.add(set, 3)
       iex> OrderedCollections.SortedSet.to_list(set)
       [1, 2, 3]
   """
   @spec add(SortedSet.t(), any()) :: SortedSet.t()
   def add(%SortedSet{set: set}, value) do
-    %SortedSet{set: :gb_sets.insert(value, set)}
+    case SortedSet.member?(%SortedSet{set: set}, value) do
+      true -> %SortedSet{set: set}
+      false -> %SortedSet{set: :gb_sets.insert(value, set)}
+    end
   end
 
   @doc """
