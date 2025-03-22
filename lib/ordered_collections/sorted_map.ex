@@ -1,10 +1,53 @@
 defmodule OrderedCollections.SortedMap do
   alias __MODULE__, as: SortedMap
+  alias OrderedCollections.SortedSet
 
   @moduledoc """
   A sorted key-value store implemented using Erlang's `:gb_trees` (Red-Black Trees).
 
-  This module stores items in sorted order by their keys.
+  This module stores items in sorted order by their keys and offers a rich set of features that allow it to integrate seamlessly with Elixir’s core protocols:
+
+  - **Enumerable:**
+    SortedMap implements the Enumerable protocol. This means you can use all the standard functions in the `Enum` module (like `Enum.map/2`, `Enum.reduce/3`, and `Enum.slice/2`) directly on a SortedMap.
+
+    **Example:**
+
+        iex> map = SortedMap.new(%{b: 2, a: 1, c: 3})
+        iex> Enum.map(map, fn {k, v} -> {k, v * 2} end)
+        [a: 2, b: 4, c: 6]
+
+  - **Collectable:**
+    SortedMap implements the Collectable protocol, allowing you to build a SortedMap from any enumerable using `Enum.into/2`.
+
+    **Example:**
+
+        iex> map = Enum.into([{:a, 1}, {:b, 2}], SortedMap.new())
+        iex> SortedMap.to_list(map)
+        [a: 1, b: 2]
+
+  - **Inspect:**
+    SortedMap implements the Inspect protocol, providing a clean and concise representation when you use `IO.inspect/1`.
+
+    **Example:**
+        iex> map = SortedMap.new(%{b: 2, a: 1})
+        iex> captured = ExUnit.CaptureIO.capture_io(fn -> IO.inspect(map) end)
+        iex> captured
+        ~s(#SortedMap<%{a: 1, b: 2}>\\n)
+
+
+  - **JSON Encoding:**
+    SortedMap implements the JSON.Encoder protocol (using the native JSON support in Elixir 1.18 and later). This ensures that when you encode a SortedMap to JSON, the keys appear in sorted order.
+
+    **Example:**
+
+        iex> map = SortedMap.new(%{a: 1, b: 2})
+        iex> JSON.encode!(map)
+        ~s({"a":1,"b":2})
+
+  ## Implementation Details
+
+  Internally, SortedMap wraps Erlang's `:gb_trees` to achieve efficient insertion, lookup, and deletion operations while automatically maintaining the order of keys. By leveraging the power of Erlang's native data structures and integrating with protocols like Enumerable, Collectable, Inspect, and JSON.Encoder, SortedMap behaves like a first-class Elixir collection with a familiar API.
+
   """
 
   @type t :: %SortedMap{tree: :gb_trees.tree()}
@@ -202,6 +245,10 @@ defmodule OrderedCollections.SortedMap do
       iex> SortedMap.max_key(sm)
       :c
 
+      iex> sm = SortedMap.new(%{b: 10, a: 99, c: 3})
+      iex> SortedMap.max_key(sm)
+      :c
+
       iex> sm_empty = SortedMap.new()
       iex> SortedMap.max_key(sm_empty)
       :none
@@ -236,9 +283,20 @@ defmodule OrderedCollections.SortedMap do
       iex> sm = SortedMap.new(%{b: 2, a: 1})
       iex> SortedMap.to_map(sm)
       %{a: 1, b: 2}
+
+      iex> sm = SortedMap.new(%{a: 2, b: 1})
+      iex> captured = ExUnit.CaptureIO.capture_io(fn -> IO.inspect(sm) end)
+      iex> captured
+      ~s(#SortedMap<%{a: 2, b: 1}>\\n)
+      iex> SortedMap.to_map(sm)
+      %{a: 2, b: 1}
   """
   @spec to_map(SortedMap.t()) :: map()
-  def to_map(%SortedMap{tree: tree}), do: Enum.into(:gb_trees.to_list(tree), %{})
+  def to_map(sorted_map) do
+    SortedMap.to_list(sorted_map)
+    |> SortedSet.new()
+    |> Enum.into(Map.new())
+  end
 
   @doc """
   Iterates over a range of keys, returning key-value pairs

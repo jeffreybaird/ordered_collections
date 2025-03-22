@@ -15,6 +15,9 @@ defimpl Collectable, for: OrderedCollections.SortedMap do
 
       iex> Enum.into(%{a: 1, b: 3}, SortedMap.new(%{a: 2, b: 3})) |> SortedMap.to_list()
       [a: 1, b: 3]
+
+      iex> SortedMap.new(%{a: 1, b: 3}) |> Enum.into(SortedMap.new(%{n: -1})) |> SortedMap.to_map()
+      %{n: -1, a: 1, b: 3}
   """
   def into(sorted_map) do
     collected_fun = fn

@@ -2,19 +2,55 @@ defmodule OrderedCollections.SortedSet do
   @moduledoc """
   A sorted set implemented using Erlang's `:gb_sets`.
 
-  This module provides a sorted set data structure with efficient insertions,
-  deletions, and membership checks. Internally it wraps Erlang's `:gb_sets`
-  to maintain elements in sorted order.
+  This module provides a sorted set data structure that stores unique elements in sorted order.
+  Internally, it wraps Erlang's `:gb_sets` to provide efficient operations (insertion, deletion, and
+  membership checking). SortedSet is designed to integrate seamlessly with Elixir’s core protocols,
+  making it behave like a first-class Elixir collection.
 
-  ## Examples
+  ### Protocol Support
 
-      iex> set = OrderedCollections.SortedSet.new()
-      iex> OrderedCollections.SortedSet.to_list(set)
-      []
+  - **Enumerable:**
+    SortedSet implements the Enumerable protocol. This means you can traverse the set using functions
+    like `Enum.map/2`, `Enum.reduce/3`, and `Enum.slice/2`, all while preserving the sorted order of elements.
 
-      iex> set = OrderedCollections.SortedSet.new([3, 1, 2])
-      iex> OrderedCollections.SortedSet.to_list(set)
-      [1, 2, 3]
+    **Example:**
+        iex> set = SortedSet.new([3, 1, 2])
+        iex> Enum.map(set, &(&1 * 2))
+        [2, 4, 6]
+
+  - **Collectable:**
+    SortedSet implements the Collectable protocol, allowing you to build a SortedSet from any enumerable
+    using `Enum.into/2`.
+
+    **Example:**
+        iex> set = Enum.into([3, 1, 2], SortedSet.new())
+        iex> SortedSet.to_list(set)
+        [1, 2, 3]
+
+  - **Inspect:**
+    SortedSet implements the Inspect protocol, providing a clean and readable output when you use
+    `IO.inspect/1`.
+
+    **Example:**
+        iex> set = SortedSet.new([3, 1, 2])
+        iex> captured = ExUnit.CaptureIO.capture_io(fn -> IO.inspect(set) end)
+        iex> captured
+        ~s(#SortedSet<[1, 2, 3]>\\n)
+
+  - **JSON Encoding:**
+    SortedSet implements the JSON.Encoder protocol (using Elixir 1.18's native JSON support) so that
+    when you encode a SortedSet to JSON, it is represented as an array with the elements in sorted order.
+
+    **Example:**
+        iex> set = SortedSet.new([3, 1, 2])
+        iex> JSON.encode!(set)
+        "[1,2,3]"
+
+  ### Implementation Details
+
+  Internally, SortedSet leverages Erlang's `:gb_sets` to maintain a sorted collection of unique elements.
+  By integrating with Enumerable, Collectable, Inspect, and JSON.Encoder, SortedSet provides a natural,
+  idiomatic API that behaves just like other Elixir collections while preserving the sorted order of its elements.
   """
 
   alias __MODULE__, as: SortedSet
