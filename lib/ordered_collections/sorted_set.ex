@@ -55,7 +55,7 @@ defmodule OrderedCollections.SortedSet do
 
   alias __MODULE__, as: SortedSet
 
-  @opaque t :: %SortedSet{set: any()}
+  @opaque t :: %SortedSet{set: element()}
   defstruct set: :gb_sets.empty()
 
   @type non_empty_t() :: %__MODULE__{
@@ -63,6 +63,8 @@ defmodule OrderedCollections.SortedSet do
         }
 
   @type non_empty_set() :: :gb_sets.set()
+
+  @type element() :: any()
 
   @doc """
   Creates a new empty SortedSet.
@@ -93,6 +95,8 @@ defmodule OrderedCollections.SortedSet do
   @doc """
   Adds a value to the SortedSet.
 
+  Returns the set unchanged if the item already exists in the set
+
   ## Examples
 
       iex> set = OrderedCollections.SortedSet.new([2, 3])
@@ -101,7 +105,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.to_list(set)
       [1, 2, 3]
   """
-  @spec add(SortedSet.t(), any()) :: SortedSet.t()
+  @spec add(SortedSet.t(), element()) :: SortedSet.t()
   def add(%SortedSet{set: set}, value) do
     case SortedSet.member?(%SortedSet{set: set}, value) do
       true -> %SortedSet{set: set}
@@ -119,7 +123,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.to_list(set)
       [1, 3]
   """
-  @spec delete(SortedSet.t(), any()) :: SortedSet.t()
+  @spec delete(SortedSet.t(), element()) :: SortedSet.t()
   def delete(%SortedSet{set: set}, value) do
     %SortedSet{set: :gb_sets.delete_any(value, set)}
   end
@@ -135,7 +139,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.member?(set, 4)
       false
   """
-  @spec member?(SortedSet.t(), any()) :: boolean()
+  @spec member?(SortedSet.t(), element()) :: boolean()
   def member?(%SortedSet{set: set}, value) do
     :gb_sets.is_member(value, set)
   end
@@ -149,7 +153,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.min(set)
       1
   """
-  @spec min(non_empty_t()) :: any()
+  @spec min(non_empty_t()) :: element()
   def min(%SortedSet{set: set}) do
     :gb_sets.smallest(set)
   end
@@ -163,7 +167,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.max(set)
       3
   """
-  @spec max(non_empty_t()) :: any()
+  @spec max(non_empty_t()) :: element()
   def max(%SortedSet{set: set}) do
     :gb_sets.largest(set)
   end
@@ -191,7 +195,7 @@ defmodule OrderedCollections.SortedSet do
       iex> OrderedCollections.SortedSet.range(set, 2, 4)
       [2, 3, 4]
   """
-  @spec range(SortedSet.t(), any(), any()) :: list()
+  @spec range(SortedSet.t(), element(), element()) :: list()
   def range(%SortedSet{set: set}, min, max) do
     set
     |> :gb_sets.to_list()
@@ -229,5 +233,20 @@ defmodule OrderedCollections.SortedSet do
   @spec difference(SortedSet.t(), SortedSet.t()) :: SortedSet.t()
   def difference(%SortedSet{set: s1}, %SortedSet{set: s2}) do
     %SortedSet{set: :gb_sets.subtract(s1, s2)}
+  end
+
+  @doc """
+  Returns a new SortedSet that contains elements present in both sets.
+
+  ## Examples
+
+      iex> set1 = SortedSet.new([1, 2, 3])
+      iex> set2 = SortedSet.new([2, 3, 4])
+      iex> SortedSet.intersection(set1, set2) |> SortedSet.to_list()
+      [2, 3]
+  """
+  @spec intersection(SortedSet.t(), SortedSet.t()) :: SortedSet.t()
+  def intersection(%SortedSet{set: s1}, %SortedSet{set: s2}) do
+    %SortedSet{set: :gb_sets.intersection(s1, s2)}
   end
 end
