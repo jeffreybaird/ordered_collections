@@ -12,13 +12,12 @@ defmodule OrderedCollections do
   For `SortedSet`, elements are maintained in a sorted order per Erlang's
   `:gb_sets` module.
 
-
-  ## Modules
+  ## Core Modules
 
     - `OrderedCollections.SortedMap` - A sorted key-value store implemented using Erlang's `:gb_trees`.
     - `OrderedCollections.SortedSet` - A sorted set implemented using Erlang's `:gb_sets`.
 
-  ## Examples
+  ## Core Module Examples
 
       iex> sm = OrderedCollections.SortedMap.new(%{b: 2, a: 1})
       iex> OrderedCollections.SortedMap.get(sm, :a)
@@ -28,7 +27,12 @@ defmodule OrderedCollections do
       iex> OrderedCollections.SortedSet.to_list(ss)
       [1, 2, 3]
 
-  You can also use convenience functions:
+  ## Convenience Functions
+
+  This module also provides convenience functions that wrap the core module functions.
+  These functions are prefixed with `map_` for SortedMap operations and `set_` for SortedSet operations.
+
+  ### Map Convenience Functions
 
       iex> sm = OrderedCollections.new_map(%{x: 10})
       iex> sm = OrderedCollections.put_map(sm, :y, 20)
@@ -40,6 +44,8 @@ defmodule OrderedCollections do
       iex> OrderedCollections.to_map(sm)
       %{a: 1}
 
+  ### Set Convenience Functions
+
       iex> ss = OrderedCollections.new_set([3, 1, 2])
       iex> ss = OrderedCollections.add_set_value(ss, 4)
       iex> OrderedCollections.set_member?(ss, 4)
@@ -50,9 +56,9 @@ defmodule OrderedCollections do
       iex> OrderedCollections.SortedSet.to_list(ss)
       [1]
 
-  ## Map Operations
+  ### Map Operations via Convenience Functions
 
-  The `SortedMap` module provides various operations:
+  The following examples show how to use the convenience functions for map operations:
 
       iex> sm = OrderedCollections.new_map(%{b: 2, a: 1, c: 3})
       iex> OrderedCollections.map_keys(sm)
@@ -69,9 +75,9 @@ defmodule OrderedCollections do
       iex> OrderedCollections.map_max_key(sm)
       :c
 
-  ## Set Operations
+  ### Set Operations via Convenience Functions
 
-  The `SortedSet` module also provides set operations:
+  The following examples show how to use the convenience functions for set operations:
 
       iex> set1 = OrderedCollections.new_set([1, 2, 3])
       iex> set2 = OrderedCollections.new_set([3, 4, 5])
@@ -82,17 +88,17 @@ defmodule OrderedCollections do
       iex> OrderedCollections.set_intersection(set1, set2) |> OrderedCollections.SortedSet.to_list()
       [3]
 
-  ## Range Operations
+  ### Range Operations via Convenience Functions
 
-  You can get elements within a specific range:
+  You can get elements within a specific range using convenience functions:
 
       iex> set = OrderedCollections.new_set([1, 2, 3, 4, 5])
       iex> OrderedCollections.set_range(set, 2, 4) |> OrderedCollections.SortedSet.to_list()
       [2, 3, 4]
 
-  ## Min/Max Operations
+  ### Min/Max Operations via Convenience Functions
 
-  You can get the minimum and maximum elements:
+  You can get the minimum and maximum elements using convenience functions:
 
       iex> set = OrderedCollections.new_set([3, 1, 2])
       iex> OrderedCollections.set_min(set)
