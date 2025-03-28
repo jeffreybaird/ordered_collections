@@ -43,7 +43,7 @@ defimpl Inspect, for: OrderedCollections.SortedMap do
   defp pair_doc(k, v, opts) when is_atom(k) do
     key_str =
       k
-      |> Inspect.inspect(opts)
+      |> to_string()
       |> String.trim_leading(":")
 
     value_doc = to_doc(v, opts)

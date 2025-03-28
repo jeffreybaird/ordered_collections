@@ -3,6 +3,8 @@ defmodule SortedMapTest do
   alias OrderedCollections.SortedMap
   doctest SortedMap
 
+  import DialyzerHelper
+
   test "creates an empty map" do
     assert SortedMap.new() |> SortedMap.to_list() == []
   end
@@ -11,11 +13,87 @@ defmodule SortedMapTest do
     assert SortedMap.new(%{b: 2, a: 1}) |> SortedMap.to_map() == %{a: 1, b: 2}
   end
 
+  test "raises a FunctionClauseError when put is given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      dialyzer_warning_ignore(&SortedMap.new/1, 1)
+    end
+  end
+
+  test "returns the keys for a map" do
+    map = SortedMap.new(%{b: 2, a: 1})
+    assert SortedMap.keys(map) == [:a, :b]
+  end
+
+  test "handles an empty map" do
+    map = SortedMap.new()
+    assert SortedMap.keys(map) == []
+  end
+
+  test "raises a FunctionClauseError when keys is given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      dialyzer_warning_ignore(&SortedMap.keys/1, 1)
+    end
+  end
+
+  test "raises an error when get is given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      l = [a: 1]
+      dialyzer_warning_ignore(&SortedMap.get/3, [l, :a, 1])
+    end
+  end
+
+  test "returns values for a map" do
+    map = SortedMap.new(%{b: 2, a: 1})
+    assert SortedMap.values(map) == [1, 2]
+  end
+
+  test "handles an empty map valuex" do
+    map = SortedMap.new()
+    assert SortedMap.values(map) == []
+  end
+
+  test "raises a FunctionClauseError when values is given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      dialyzer_warning_ignore(&SortedMap.values/1, 1)
+    end
+  end
+
+  test "merges two maps" do
+    map1 = SortedMap.new(%{a: 1, b: 2})
+    map2 = SortedMap.new(%{b: 3, c: 4})
+    merged_map = SortedMap.merge(map1, map2) |> SortedMap.to_list()
+    expected = SortedMap.new(%{a: 1, b: 3, c: 4}) |> SortedMap.to_list()
+    assert merged_map == expected
+  end
+
+  test "merges with an empty map" do
+    map1 = SortedMap.new(%{a: 1, b: 2})
+    map2 = SortedMap.new()
+    assert SortedMap.merge(map1, map2) == SortedMap.new(%{a: 1, b: 2})
+  end
+
+  test "raises a FunctionClauseError when merge is given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      dialyzer_warning_ignore(&SortedMap.merge/2, [%{}, 1])
+    end
+  end
+
   test "inserts and retrieves values" do
     map = SortedMap.new() |> SortedMap.put(:a, 10) |> SortedMap.put(:b, 20)
     assert SortedMap.get(map, :a) == 10
     assert SortedMap.get(map, :b) == 20
     assert SortedMap.get(map, :c, "default") == "default"
+  end
+
+  test "inserts a nil value" do
+    map = SortedMap.new() |> SortedMap.put(:a, nil)
+    assert SortedMap.get(map, :a) == nil
+  end
+
+  test "raises a FunctionClauseError when given a non-map" do
+    assert_raise FunctionClauseError, fn ->
+      dialyzer_warning_ignore(&SortedMap.put/3, [%{}, :a, 1])
+    end
   end
 
   test "updates a value in a sorted map" do

@@ -2,6 +2,8 @@ defmodule OrderedCollectionsTest do
   use ExUnit.Case
   doctest OrderedCollections
 
+  import DialyzerHelper
+
   describe "OrderedCollections" do
     test "get a nonexistant key from a SortedMap" do
       sm = OrderedCollections.new_map(%{b: 2, a: 1})
@@ -94,16 +96,6 @@ defmodule OrderedCollectionsTest do
         (&OrderedCollections.SortedSet.member?/2)
         |> dialyzer_warning_ignore([[2, 3], 1])
       end
-    end
-
-    # Helper function to avoid dialyzer warnings
-    @dialyzer {:nowarn_function, [dialyzer_warning_ignore: 2]}
-    defp dialyzer_warning_ignore(function, args) when is_list(args) do
-      apply(function, args)
-    end
-
-    defp dialyzer_warning_ignore(fun, arg) do
-      fun.(arg)
     end
   end
 end

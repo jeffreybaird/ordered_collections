@@ -2,6 +2,8 @@ defmodule OrderedCollections.SortedSetTest do
   use ExUnit.Case, async: true
   alias OrderedCollections.SortedSet
 
+  import DialyzerHelper
+
   doctest SortedSet
 
   describe "SortedSet.new/0 and SortedSet.new/1" do
@@ -147,17 +149,17 @@ defmodule OrderedCollections.SortedSetTest do
     test "returns elements within a given range for numbers" do
       set = SortedSet.new([2, 10, 5, 1])
       # Expected to return [1, 2, 5] when asked for range 1 to 5.
-      assert SortedSet.range(set, 1, 5) == [1, 2, 5]
+      assert SortedSet.range(set, 1, 5) |> SortedSet.to_list() == [1, 2, 5]
     end
 
     test "returns elements within a given range for strings" do
       set = SortedSet.new(["d", "a", "c", "b"])
-      assert SortedSet.range(set, "b", "d") == ["b", "c", "d"]
+      assert SortedSet.range(set, "b", "d") |> SortedSet.to_list() == ["b", "c", "d"]
     end
 
     test "returns an empty list for an empty set" do
       set = SortedSet.new()
-      assert SortedSet.range(set, 1, 5) == []
+      assert SortedSet.range(set, 1, 5) |> SortedSet.to_list() == []
     end
 
     test "raises an error when getting range from a non-set" do
@@ -221,7 +223,9 @@ defmodule OrderedCollections.SortedSetTest do
         |> dialyzer_warning_ignore([1, 1])
       end
     end
+  end
 
+  describe "SortedSet.intersection/2" do
     test "returns a set with the shared elements of two sets" do
       set1 = SortedSet.new([1, 2, 3])
       set2 = SortedSet.new([3, 4, 5])
@@ -251,16 +255,6 @@ defmodule OrderedCollections.SortedSetTest do
         (&SortedSet.intersection/2)
         |> dialyzer_warning_ignore([1, 1])
       end
-    end
-
-    # Helper function to avoid dialyzer warnings
-    @dialyzer {:nowarn_function, [dialyzer_warning_ignore: 2]}
-    defp dialyzer_warning_ignore(function, args) when is_list(args) do
-      apply(function, args)
-    end
-
-    defp dialyzer_warning_ignore(fun, arg) do
-      fun.(arg)
     end
   end
 end

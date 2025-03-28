@@ -4,7 +4,7 @@ defmodule OrderedCollections.SortedSet do
 
   This module provides a sorted set data structure that stores unique elements in sorted order.
   Internally, it wraps Erlang's `:gb_sets` to provide efficient operations (insertion, deletion, and
-  membership checking). SortedSet is designed to integrate seamlessly with Elixir’s core protocols,
+  membership checking). SortedSet is designed to integrate seamlessly with Elixir's core protocols,
   making it behave like a first-class Elixir collection.
 
   ### Protocol Support
@@ -192,17 +192,32 @@ defmodule OrderedCollections.SortedSet do
   ## Examples
 
       iex> set = OrderedCollections.SortedSet.new([1, 2, 3, 4, 5])
-      iex> OrderedCollections.SortedSet.range(set, 2, 4)
+      iex> OrderedCollections.SortedSet.range(set, 2, 4) |> OrderedCollections.SortedSet.to_list()
       [2, 3, 4]
   """
-  @spec range(SortedSet.t(), element(), element()) :: list()
+  @spec range(SortedSet.t(), element(), element()) :: SortedSet.t()
   def range(%SortedSet{set: set}, min, max) do
-    set
-    |> :gb_sets.to_list()
-    |> Enum.reduce([], fn elem, acc ->
-      if elem >= min and elem <= max, do: [elem | acc], else: acc
+    fold(%SortedSet{set: set}, SortedSet.new(), fn elem, acc ->
+      if elem >= min and elem <= max do
+        SortedSet.add(acc, elem)
+      else
+        acc
+      end
     end)
-    |> Enum.reverse()
+  end
+
+  @doc """
+  Folds over the elements of a SortedSet in sorted order.
+
+  ## Examples
+
+      iex> set = OrderedCollections.SortedSet.new([1, 2, 3])
+      iex> OrderedCollections.SortedSet.fold(set, 0, &+/2)
+      6
+  """
+  @spec fold(SortedSet.t(), any(), (element(), any() -> any())) :: any()
+  def fold(%SortedSet{set: set}, acc, fun) do
+    :gb_sets.fold(fun, acc, set)
   end
 
   @doc """

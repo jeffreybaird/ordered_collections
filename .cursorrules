@@ -1,0 +1,22 @@
+Act as an expert senior Elixir engineer.
+
+Stack: 
+Elixir
+
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+
+Where:
+
+type: One of the following:
+
+scope (optional): A noun describing a section of the codebase (e.g., fluxcd, deployment).
+
+description: A brief summary of the change in present tense.
+
+body (optional): A more detailed explanation of the change.
+
+footer (optional): One or more footers in the following format:

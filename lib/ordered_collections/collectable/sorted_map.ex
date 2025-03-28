@@ -21,18 +21,23 @@ defimpl Collectable, for: OrderedCollections.SortedMap do
   """
   def into(sorted_map) do
     collected_fun = fn
+      # On each element, insert it into the accumulating SortedMap.
       sorted_map_acc, {:cont, {key, value}} ->
         SortedMap.put(sorted_map_acc, key, value)
 
+      # When done, return the final SortedMap.
       sorted_map_acc, :done ->
         sorted_map_acc
 
+      # On halt, simply return :ok.
       _sorted_map_acc, :halt ->
         :ok
+
+      # Handle suspend if needed.
+      sorted_map_acc, {:suspend, _} ->
+        sorted_map_acc
     end
 
-    initial_acc = sorted_map
-
-    {initial_acc, collected_fun}
+    {sorted_map, collected_fun}
   end
 end
