@@ -35,24 +35,24 @@ defmodule OrderedCollections do
   ### Map Convenience Functions
 
       iex> sm = OrderedCollections.new_map(%{x: 10})
-      iex> sm = OrderedCollections.put_map(sm, :y, 20)
-      iex> OrderedCollections.get_map(sm, :y)
+      iex> sm = OrderedCollections.map_put(sm, :y, 20)
+      iex> OrderedCollections.map_get(sm, :y)
       20
 
       iex> sm = OrderedCollections.new_map()
-      iex> sm = OrderedCollections.put_map(sm, :a, 1)
-      iex> OrderedCollections.to_map(sm)
+      iex> sm = OrderedCollections.map_put(sm, :a, 1)
+      iex> OrderedCollections.map_to_map(sm)
       %{a: 1}
 
   ### Set Convenience Functions
 
       iex> ss = OrderedCollections.new_set([3, 1, 2])
-      iex> ss = OrderedCollections.add_set_value(ss, 4)
+      iex> ss = OrderedCollections.set_add_value(ss, 4)
       iex> OrderedCollections.set_member?(ss, 4)
       true
 
       iex> ss = OrderedCollections.new_set()
-      iex> ss = OrderedCollections.add_set_value(ss, 1)
+      iex> ss = OrderedCollections.set_add_value(ss, 1)
       iex> OrderedCollections.SortedSet.to_list(ss)
       [1]
 
@@ -66,7 +66,7 @@ defmodule OrderedCollections do
       iex> OrderedCollections.map_values(sm)
       [1, 2, 3]
       iex> sm2 = OrderedCollections.new_map(%{b: 4, d: 5})
-      iex> OrderedCollections.map_merge(sm, sm2) |> OrderedCollections.to_map()
+      iex> OrderedCollections.map_merge(sm, sm2) |> OrderedCollections.map_to_map()
       %{a: 1, b: 4, c: 3, d: 5}
       iex> OrderedCollections.map_range(sm, :a, :b)
       [a: 1, b: 2]
@@ -115,7 +115,7 @@ defmodule OrderedCollections do
   ## Examples
 
     iex> sm = OrderedCollections.new_map()
-    iex> OrderedCollections.to_map(sm)
+    iex> OrderedCollections.map_to_map(sm)
     %{}
   """
   @spec new_map() :: SortedMap.t()
@@ -128,7 +128,7 @@ defmodule OrderedCollections do
 
     iex> m = %{b: 2, a: 1}
     iex> sm = OrderedCollections.new_map(m)
-    iex> OrderedCollections.get_map(sm, :a)
+    iex> OrderedCollections.map_get(sm, :a)
     1
   """
   @spec new_map(map()) :: SortedMap.t()
@@ -145,11 +145,11 @@ defmodule OrderedCollections do
   ## Examples
 
     iex> sm = OrderedCollections.new_map(%{b: 2, a: 1})
-    iex> OrderedCollections.to_map(sm)
+    iex> OrderedCollections.map_to_map(sm)
     %{a: 1, b: 2}
   """
-  @spec to_map(SortedMap.t()) :: map()
-  def to_map(%OrderedCollections.SortedMap{} = sorted_map), do: SortedMap.to_map(sorted_map)
+  @spec map_to_map(SortedMap.t()) :: map()
+  def map_to_map(%OrderedCollections.SortedMap{} = sorted_map), do: SortedMap.to_map(sorted_map)
 
   @doc """
   Inserts a key-value pair into a SortedMap.
@@ -157,12 +157,12 @@ defmodule OrderedCollections do
   ## Examples
 
     iex> sm = OrderedCollections.new_map()
-    iex> sm = OrderedCollections.put_map(sm, :a, 1)
-    iex> OrderedCollections.get_map(sm, :a)
+    iex> sm = OrderedCollections.map_put(sm, :a, 1)
+    iex> OrderedCollections.map_get(sm, :a)
     1
   """
-  @spec put_map(SortedMap.t(), any(), any()) :: SortedMap.t()
-  def put_map(%OrderedCollections.SortedMap{} = sorted_map, key, value),
+  @spec map_put(SortedMap.t(), any(), any()) :: SortedMap.t()
+  def map_put(%OrderedCollections.SortedMap{} = sorted_map, key, value),
     do: SortedMap.put(sorted_map, key, value)
 
   @doc """
@@ -171,13 +171,13 @@ defmodule OrderedCollections do
   ## Examples
 
     iex> sm = OrderedCollections.new_map(%{a: 1})
-    iex> OrderedCollections.get_map(sm, :a)
+    iex> OrderedCollections.map_get(sm, :a)
     1
-    iex> OrderedCollections.get_map(sm, :b, 2)
+    iex> OrderedCollections.map_get(sm, :b, 2)
     2
   """
-  @spec get_map(SortedMap.t(), any(), any()) :: any()
-  def get_map(%OrderedCollections.SortedMap{} = sorted_map, key, default \\ nil),
+  @spec map_get(SortedMap.t(), any(), any()) :: any()
+  def map_get(%OrderedCollections.SortedMap{} = sorted_map, key, default \\ nil),
     do: SortedMap.get(sorted_map, key, default)
 
   @doc """
@@ -211,7 +211,7 @@ defmodule OrderedCollections do
 
       iex> sm1 = OrderedCollections.new_map(%{a: 1, b: 2})
       iex> sm2 = OrderedCollections.new_map(%{b: 3, c: 4})
-      iex> OrderedCollections.map_merge(sm1, sm2) |> OrderedCollections.to_map()
+      iex> OrderedCollections.map_merge(sm1, sm2) |> OrderedCollections.map_to_map()
       %{a: 1, b: 3, c: 4}
   """
   @spec map_merge(SortedMap.t(), SortedMap.t()) :: SortedMap.t()
@@ -225,10 +225,10 @@ defmodule OrderedCollections do
 
       iex> sm = OrderedCollections.new_map(%{a: 1})
       iex> sm = OrderedCollections.map_update(sm, :a, &(&1 + 1))
-      iex> OrderedCollections.get_map(sm, :a)
+      iex> OrderedCollections.map_get(sm, :a)
       2
 
-      iex> OrderedCollections.new_map(%{a: 1}) |> OrderedCollections.map_update(:b, &(&1 + 1)) |> OrderedCollections.get_map(:b)
+      iex> OrderedCollections.new_map(%{a: 1}) |> OrderedCollections.map_update(:b, &(&1 + 1)) |> OrderedCollections.map_get(:b)
       nil
   """
   @spec map_update(SortedMap.t(), any(), (any() -> any())) :: SortedMap.t()
@@ -242,10 +242,10 @@ defmodule OrderedCollections do
 
       iex> sm = OrderedCollections.new_map(%{a: 1})
       iex> sm = OrderedCollections.map_update(sm, :a, &(&1 + 5), 0)
-      iex> OrderedCollections.get_map(sm, :a)
+      iex> OrderedCollections.map_get(sm, :a)
       6
 
-      iex> OrderedCollections.new_map(%{a: 1}) |> OrderedCollections.map_update(:b, &(&1 + 1), 10) |> OrderedCollections.get_map(:b)
+      iex> OrderedCollections.new_map(%{a: 1}) |> OrderedCollections.map_update(:b, &(&1 + 1), 10) |> OrderedCollections.map_get(:b)
       10
   """
   @spec map_update(SortedMap.t(), any(), (any() -> any()), any()) :: SortedMap.t()
@@ -260,10 +260,10 @@ defmodule OrderedCollections do
 
       iex> sm = OrderedCollections.new_map(%{a: 1, b: 2})
       iex> sm = OrderedCollections.map_update_with_value(sm, :a, 100)
-      iex> OrderedCollections.get_map(sm, :a)
+      iex> OrderedCollections.map_get(sm, :a)
       100
       iex> OrderedCollections.map_update_with_value(sm, :c, 300)
-      iex> OrderedCollections.get_map(sm, :c)
+      iex> OrderedCollections.map_get(sm, :c)
       nil
   """
   @spec map_update_with_value(SortedMap.t(), any(), any()) :: SortedMap.t()
@@ -349,7 +349,7 @@ defmodule OrderedCollections do
   ## Examples
 
       iex> sm = OrderedCollections.new_map(%{a: 1, b: 2, c: 3})
-      iex> smi = OrderedCollections.new_map() |> OrderedCollections.put_map(:a, 1) |> OrderedCollections.put_map(:b, 2) |> OrderedCollections.put_map(:c, 3)
+      iex> smi = OrderedCollections.new_map() |> OrderedCollections.map_put(:a, 1) |> OrderedCollections.map_put(:b, 2) |> OrderedCollections.map_put(:c, 3)
       iex> sm == smi
       false
       iex> OrderedCollections.map_rebalance(sm) == OrderedCollections.map_rebalance(smi)
@@ -390,13 +390,13 @@ defmodule OrderedCollections do
   ## Examples
 
       iex> ss = OrderedCollections.new_set([2, 3])
-      iex> ss = OrderedCollections.add_set_value(ss, 1)
-      iex> ss = OrderedCollections.add_set_value(ss, 3)
+      iex> ss = OrderedCollections.set_add_value(ss, 1)
+      iex> ss = OrderedCollections.set_add_value(ss, 3)
       iex> OrderedCollections.SortedSet.to_list(ss)
       [1, 2, 3]
   """
-  @spec add_set_value(OrderedCollections.SortedSet.t(), any()) :: OrderedCollections.SortedSet.t()
-  def add_set_value(sorted_set, value),
+  @spec set_add_value(OrderedCollections.SortedSet.t(), any()) :: OrderedCollections.SortedSet.t()
+  def set_add_value(sorted_set, value),
     do: SortedSet.add(sorted_set, value)
 
   @doc """
@@ -405,13 +405,13 @@ defmodule OrderedCollections do
   ## Examples
 
       iex> ss = OrderedCollections.new_set([1, 2, 3])
-      iex> ss = OrderedCollections.delete_set_value(ss, 2)
+      iex> ss = OrderedCollections.set_delete_value(ss, 2)
       iex> OrderedCollections.SortedSet.to_list(ss)
       [1, 3]
   """
-  @spec delete_set_value(OrderedCollections.SortedSet.t(), any()) ::
+  @spec set_delete_value(OrderedCollections.SortedSet.t(), any()) ::
           OrderedCollections.SortedSet.t()
-  def delete_set_value(sorted_set, value),
+  def set_delete_value(sorted_set, value),
     do: SortedSet.delete(sorted_set, value)
 
   @doc """
