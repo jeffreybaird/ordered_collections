@@ -140,7 +140,12 @@ defmodule OrderedCollections.SortedMap do
   """
   @spec put(SortedMap.t(), any(), any()) :: SortedMap.t()
   def put(%SortedMap{tree: tree} = map, key, value) do
-    %SortedMap{map | tree: :gb_trees.enter(key, value, tree)}
+    try do
+      %SortedMap{tree: :gb_trees.insert(key, value, tree)}
+    rescue
+      _ ->
+        %SortedMap{map | tree: :gb_trees.enter(key, value, tree)}
+    end
   end
 
   @doc """

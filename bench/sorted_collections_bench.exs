@@ -18,15 +18,23 @@ end
 Mix.Task.run("app.start")
 alias OrderedCollections.SortedMap
 alias OrderedCollections.SortedSet
+alias OrderedCollections
 
 # Prepare sample data for the benchmark
 keys = Enum.to_list(1..10_000)
 values = Enum.map(keys, fn k -> {k, k} end)
 
-# Benchmark functions for SortedMap
+# Benchmark functions for SortedMap (core)
 sorted_map_insert = fn ->
   Enum.reduce(values, SortedMap.new(), fn {k, v}, acc ->
     SortedMap.put(acc, k, v)
+  end)
+end
+
+# Benchmark functions for SortedMap (convenience)
+map_insert = fn ->
+  Enum.reduce(values, OrderedCollections.new_map(), fn {k, v}, acc ->
+    OrderedCollections.map_put(acc, k, v)
   end)
 end
 
@@ -37,17 +45,18 @@ gb_tree_insert = fn ->
   end)
 end
 
-unsorted_map_insert =
-  fn ->
-    Enum.reduce(values, %{}, fn {k, v}, acc ->
-      Map.put(acc, k, v)
-    end)
-  end
+unsorted_map_insert = fn ->
+  Enum.reduce(values, %{}, fn {k, v}, acc ->
+    Map.put(acc, k, v)
+  end)
+end
 
 map = unsorted_map_insert.()
 sorted_map = sorted_map_insert.()
+convenience_map = map_insert.()
 gb_list = gb_tree_insert.()
 
+# Core SortedMap operations
 sorted_map_lookup = fn map ->
   Enum.each(keys, fn k ->
     SortedMap.get(map, k)
@@ -57,6 +66,19 @@ end
 sorted_map_delete = fn map ->
   Enum.each(keys, fn k ->
     _ = SortedMap.delete(map, k)
+  end)
+end
+
+# Convenience Map operations
+map_lookup = fn map ->
+  Enum.each(keys, fn k ->
+    OrderedCollections.map_get(map, k)
+  end)
+end
+
+map_delete = fn map ->
+  Enum.each(keys, fn k ->
+    OrderedCollections.map_delete(map, k)
   end)
 end
 
@@ -76,9 +98,17 @@ end
 # to simulate unsorted insertion
 set_values = Enum.shuffle(keys)
 
+# Core SortedSet operations
 sorted_set_insert = fn ->
   Enum.reduce(set_values, SortedSet.new(), fn k, acc ->
     SortedSet.add(acc, k)
+  end)
+end
+
+# Convenience Set operations
+set_insert = fn ->
+  Enum.reduce(set_values, OrderedCollections.new_set(), fn k, acc ->
+    OrderedCollections.set_add_value(acc, k)
   end)
 end
 
@@ -89,23 +119,38 @@ gb_set_insert = fn ->
 end
 
 sorted_set = sorted_set_insert.()
+convenience_set = set_insert.()
 gb_set = gb_set_insert.()
 
+# Core SortedSet operations
 sorted_set_lookup = fn set ->
   Enum.each(set_values, fn k ->
     SortedSet.member?(set, k)
   end)
 end
 
-gb_set_lookup = fn set ->
-  Enum.each(set_values, fn k ->
-    :gb_sets.is_member(k, set)
-  end)
-end
-
 sorted_set_delete = fn set ->
   Enum.each(set_values, fn k ->
     _ = SortedSet.delete(set, k)
+  end)
+end
+
+# Convenience Set operations
+set_lookup = fn set ->
+  Enum.each(set_values, fn k ->
+    OrderedCollections.set_member?(set, k)
+  end)
+end
+
+set_delete = fn set ->
+  Enum.each(set_values, fn k ->
+    OrderedCollections.set_delete_value(set, k)
+  end)
+end
+
+gb_set_lookup = fn set ->
+  Enum.each(set_values, fn k ->
+    :gb_sets.is_member(k, set)
   end)
 end
 
@@ -116,54 +161,74 @@ gb_set_delete = fn set ->
 end
 
 # Run benchmarks using Benchee
-IO.puts("=== Delete Operations ===")
+IO.puts("=== Map Delete Operations ===")
 
 Benchee.run(%{
-  "Delete - SortedMap" => fn -> sorted_map_delete.(sorted_map) end,
+  "Delete - SortedMap (Core)" => fn -> sorted_map_delete.(sorted_map) end,
+  "Delete - SortedMap (Convenience)" => fn -> map_delete.(convenience_map) end,
   "Delete - gb_trees" => fn -> gb_tree_delete.(gb_list) end
 })
 
-IO.puts("=== Insert Operations ===")
+IO.puts("=== Map Insert Operations ===")
 
 Benchee.run(%{
-  "Insert - SortedMap" => sorted_map_insert,
+  "Insert - SortedMap (Core)" => sorted_map_insert,
+  "Insert - SortedMap (Convenience)" => map_insert,
   "Insert - gb_trees" => gb_tree_insert
 })
 
-IO.puts("=== Lookup Operations ===")
+IO.puts("=== Map Lookup Operations ===")
 
 Benchee.run(%{
-  "SortedMap Lookup" => fn -> sorted_map_lookup.(sorted_map) end,
+  "SortedMap Lookup (Core)" => fn -> sorted_map_lookup.(sorted_map) end,
+  "SortedMap Lookup (Convenience)" => fn -> map_lookup.(convenience_map) end,
   "gb_trees Lookup" => fn -> gb_tree_lookup.(gb_list) end
 })
 
-IO.puts("=== Range Operations ===")
+IO.puts("=== Map Range Operations ===")
 
 Benchee.run(%{
-  "SortedMap Range" => fn ->
+  "SortedMap Range (Core)" => fn ->
     SortedMap.range(sorted_map, 1000, 2000)
+  end,
+  "SortedMap Range (Convenience)" => fn ->
+    OrderedCollections.map_range(convenience_map, 1000, 2000)
   end,
   "gb_trees Range" => fn -> TestModule.gb_tree_range(gb_list, 1000, 2000) end,
   "Elixir Range" => fn -> TestModule.range(map, 1000, 2000) end
 })
 
-IO.puts("=== SET Delete Operations ===")
+IO.puts("=== Set Delete Operations ===")
 
 Benchee.run(%{
-  "Delete - SortedSet" => fn -> sorted_set_delete.(sorted_set) end,
+  "Delete - SortedSet (Core)" => fn -> sorted_set_delete.(sorted_set) end,
+  "Delete - SortedSet (Convenience)" => fn -> set_delete.(convenience_set) end,
   "Delete - :gb_sets" => fn -> gb_set_delete.(gb_set) end
 })
 
-IO.puts("=== SET Insert Operations ===")
+IO.puts("=== Set Insert Operations ===")
 
 Benchee.run(%{
-  "Insert - SortedSet" => sorted_set_insert,
+  "Insert - SortedSet (Core)" => sorted_set_insert,
+  "Insert - SortedSet (Convenience)" => set_insert,
   "Insert - :gb_sets" => gb_set_insert
 })
 
-IO.puts("=== SET Lookup Operations ===")
+IO.puts("=== Set Lookup Operations ===")
 
 Benchee.run(%{
-  "SortedSet Lookup" => fn -> sorted_set_lookup.(sorted_set) end,
+  "SortedSet Lookup (Core)" => fn -> sorted_set_lookup.(sorted_set) end,
+  "SortedSet Lookup (Convenience)" => fn -> set_lookup.(convenience_set) end,
   ":gb_sets Lookup" => fn -> gb_set_lookup.(gb_set) end
+})
+
+IO.puts("=== Set Range Operations ===")
+
+Benchee.run(%{
+  "SortedSet Range (Core)" => fn ->
+    SortedSet.range(sorted_set, 1000, 2000)
+  end,
+  "SortedSet Range (Convenience)" => fn ->
+    OrderedCollections.set_range(convenience_set, 1000, 2000)
+  end
 })
