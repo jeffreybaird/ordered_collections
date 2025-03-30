@@ -4,7 +4,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
 
 **OrderedCollections** is a library for Elixir that provides efficient, sorted data structures:
 
-`SortedMap` and `SortedSet` wrap Erlang’s `:gb_trees` and `:gb_sets` for easy use in Elixir.
+`SortedMap` and `SortedSet` wrap Erlang's `:gb_trees` and `:gb_sets` for easy use in Elixir.
 
 ## Features
 
@@ -13,7 +13,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Fast lookups using `:gb_trees`
   - Range queries over keys.
   - Conversion to standard Elixir `Map` or list.
-  - Implements `Enum` and `Collectable`
+  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
 
 - **SortedSet**
   - Maintain a set of unique elements in sorted order.
@@ -21,7 +21,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Union, intersection, and difference operations.
   - Range queries over elements.
   - Conversion to a standard Elixir `MapSet` or list.
-  - Implements `Enum` and `Collectable`
+  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
 
 ## Installation
 
@@ -30,26 +30,36 @@ Add `ordered_collections` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ordered_collections, "~> 0.1.1"}
+    {:ordered_collections, "~> 0.3.2"}
   ]
 end
 ```
 
 ## Benchmarks
+### Running Benchmarks
 
-Below is an example of how you might format the benchmark data in Markdown for a README:
+To run the benchmarks for OrderedCollections, follow these steps:
 
----
+1. Ensure your dependencies are up-to-date by running:
+   mix deps.get
 
-# Benchmark Results
+2. Compile the project:
+   mix compile
 
-This document summarizes the performance benchmarks for various map and set operations. Each section details the environment, benchmark configuration, results, and comparisons.
+3. Execute the benchmark suite:
+   mix run bench/sorted_collections_bench.exs
+
+This command will automatically locate and run all benchmark files under the "bench/sorted_collections/" directory. You can also run individual benchmark files if desired, for example:
+   mix run bench/sorted_collections/<set|map>/bench.exs
+or
+  mix run bench/sorted_collections/<set|map>/<delete|insert|lookup|range>/bench.exs
+
+Benchmarks are configured using [Benchee](https://github.com/bencheeorg/benchee). Feel free to modify the benchmark settings in the respective files as needed.
+
+### Pre-executed Benchmarks
+Below are the benchmark results for various map and set operations. Each section details the environment, benchmark configuration, results, and comparisons.
 
 > **Note:** All benchmarks were executed on macOS using an Apple M3 CPU with 8 cores, 16 GB of memory, Elixir 1.18.3, Erlang 27.2.4, and JIT enabled.
-
----
-
-## Map Delete Operations
 
 ### Environment
 - **Operating System:** macOS
@@ -58,6 +68,8 @@ This document summarizes the performance benchmarks for various map and set oper
 - **Elixir:** 1.18.3
 - **Erlang:** 27.2.4
 - **JIT Enabled:** true
+
+## Map Delete Operations
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -81,12 +93,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **Delete - SortedMap (Core):** 989.02 ips (1.10× slower, +0.0888 ms)
 - **Delete - SortedMap (Convenience):** 986.13 ips (1.10× slower, +0.0918 ms)
 
----
-
 ## Map Insert Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -110,12 +117,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **Insert - gb_trees:**                       329.53 - 1.01x slower +0.0445 ms
 - **Insert - SortedMap (Core):**               329.17 - 1.02x slower +0.0479 ms
 
----
-
 ## Map Lookup Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -139,12 +141,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **SortedMap Lookup (Core):** 2.28K ips (1.18× slower, +66.60 μs)
 - **SortedMap Lookup (Convenience):** 2.11K ips (1.28× slower, +102.91 μs)
 
----
-
 ## Map Range Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -170,12 +167,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **gb_trees Range:** 8.42K ips (1.06× slower, +6.22 μs)
 - **Elixir Range:** 5.43K ips (1.64× slower, +71.66 μs)
 
----
-
 ## Set Delete Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -199,12 +191,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **Delete - SortedSet (Convenience):** 675.48 ips (1.02× slower, +0.0245 ms)
 - **Delete - :gb_sets:** 631.20 ips (1.09× slower, +0.128 ms)
 
----
-
 ## Set Insert Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -228,12 +215,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **Insert - SortedSet (Convenience):** 383.41 ips (1.45× slower, +0.81 ms)
 - **Insert - SortedSet (Core):** 381.61 ips (1.45× slower, +0.82 ms)
 
----
-
 ## Set Lookup Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -257,12 +239,7 @@ This document summarizes the performance benchmarks for various map and set oper
 - **SortedSet Lookup (Core):** 1.63K ips (1.03× slower, +19.70 μs)
 - **SortedSet Lookup (Convenience):** 1.60K ips (1.05× slower, +31.21 μs)
 
----
-
 ## Set Range Operations
-
-### Environment
-*(Same as above)*
 
 ### Benchmark Configuration
 - **Warmup:** 2 s
@@ -283,5 +260,3 @@ This document summarizes the performance benchmarks for various map and set oper
 ### Comparison
 - **SortedSet Range (Convenience):** 3.28K ips
 - **SortedSet Range (Core):** 2.27K ips (1.45× slower, +135.92 μs)
-
----

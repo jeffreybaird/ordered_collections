@@ -86,10 +86,24 @@ defmodule OrderedCollections.SortedSet do
       iex> set = OrderedCollections.SortedSet.new([3, 1, 2])
       iex> OrderedCollections.SortedSet.to_list(set)
       [1, 2, 3]
+
+      iex> map_set = MapSet.new([3, 1, 2])
+      iex> OrderedCollections.SortedSet.new(map_set)
+      #SortedSet<[1, 2, 3]>
   """
   @spec new(list()) :: SortedSet.t()
   def new(list) when is_list(list) do
     %SortedSet{set: Enum.reduce(list, :gb_sets.empty(), &:gb_sets.insert/2)}
+  end
+
+  def new(enum) do
+    if Enumerable.impl_for(enum) do
+      %SortedSet{
+        set: Enum.reduce(enum, :gb_sets.empty(), &:gb_sets.insert/2)
+      }
+    else
+      raise FunctionClauseError, "Expected an enumerable, got: #{inspect(enum)}"
+    end
   end
 
   @doc """
