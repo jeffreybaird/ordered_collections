@@ -1,0 +1,8 @@
+
+After private reduce_set opaque inference repair
+$ mix docs
+Generating docs...
+View "html" docs at "doc/index.html"
+View "epub" docs at "doc/ordered_collections.epub"
+
+EXIT_STATUS=0

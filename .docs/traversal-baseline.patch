@@ -1,0 +1,619 @@
+diff --git a/lib/ordered_collections/collectable/sorted_map.ex b/lib/ordered_collections/collectable/sorted_map.ex
+index 75d09eb..835e1c0 100644
+--- a/lib/ordered_collections/collectable/sorted_map.ex
++++ b/lib/ordered_collections/collectable/sorted_map.ex
+@@ -32,10 +32,6 @@ defimpl Collectable, for: OrderedCollections.SortedMap do
+       # On halt, simply return :ok.
+       _sorted_map_acc, :halt ->
+         :ok
+-
+-      # Handle suspend if needed.
+-      sorted_map_acc, {:suspend, _} ->
+-        sorted_map_acc
+     end
+
+     {sorted_map, collected_fun}
+diff --git a/lib/ordered_collections/collectable/sorted_set.ex b/lib/ordered_collections/collectable/sorted_set.ex
+index 078df29..158a679 100644
+--- a/lib/ordered_collections/collectable/sorted_set.ex
++++ b/lib/ordered_collections/collectable/sorted_set.ex
+@@ -9,7 +9,6 @@ defimpl Collectable, for: OrderedCollections.SortedSet do
+   - `{:cont, element}`: Adds the element to the set
+   - `:done`: Returns the final set
+   - `:halt`: Returns `:ok`
+-  - `{:suspend, _}`: Returns the current set unchanged
+
+   ## Examples
+
+@@ -21,35 +20,30 @@ defimpl Collectable, for: OrderedCollections.SortedSet do
+
+       iex> {initial, collector} = Collectable.into(SortedSet.new())
+       iex> acc = collector.(initial, {:cont, 1})
+-      iex> acc = collector.(acc, {:suspend, []})
+       iex> acc = collector.(acc, {:cont, 2})
+       iex> result = collector.(acc, :done)
+       iex> SortedSet.to_list(result)
+       [1, 2]
+   """
+   @spec into(OrderedCollections.SortedSet.t()) ::
+-          {OrderedCollections.SortedSet.t(),
+-           (OrderedCollections.SortedSet.t(),
++          {:gb_sets.set(),
++           (:gb_sets.set(),
+             :done
+             | :halt
+-            | {:cont, any()}
+-            | {:suspend, any()} ->
+-              OrderedCollections.SortedSet.t() | :ok)}
+-  def into(sorted_set) do
++            | {:cont, any()} ->
++              :gb_sets.set() | OrderedCollections.SortedSet.t() | :ok)}
++  def into(%SortedSet{set: set}) do
+     collected_fun = fn
+-      sorted_set_acc, {:cont, elm} ->
+-        SortedSet.add(sorted_set_acc, elm)
++      set_acc, {:cont, elm} ->
++        :gb_sets.add(elm, set_acc)
+
+-      sorted_set_acc, :done ->
+-        sorted_set_acc
++      set_acc, :done ->
++        %SortedSet{set: set_acc}
+
+-      _sorted_set_acc, :halt ->
++      _set_acc, :halt ->
+         :ok
+-
+-      sorted_set_acc, {:suspend, _} ->
+-        sorted_set_acc
+     end
+
+-    {sorted_set, collected_fun}
++    {set, collected_fun}
+   end
+ end
+diff --git a/lib/ordered_collections/enumerable/sorted_map.ex b/lib/ordered_collections/enumerable/sorted_map.ex
+index 39bc41b..d4b2ba7 100644
+--- a/lib/ordered_collections/enumerable/sorted_map.ex
++++ b/lib/ordered_collections/enumerable/sorted_map.ex
+@@ -16,12 +16,9 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
+       iex> Enum.reduce(map, [], fn {k, _v}, acc -> [k | acc] end) |> Enum.reverse()
+       [:a, :b, :c]
+   """
+-  @spec reduce(OrderedCollections.SortedMap.t(), {:cont, any()}, any()) ::
+-          {:cont, any()}
+-          | {:halted, any()}
+-          | {:suspended, any(), (any() -> {any(), any()} | {any(), any(), any()})}
+-  def reduce(%SortedMap{tree: {_, root_node}}, {:cont, acc}, fun) do
+-    traverse_tree(root_node, acc, fun)
++  @spec reduce(SortedMap.t(), Enumerable.acc(), Enumerable.reducer()) :: Enumerable.result()
++  def reduce(%SortedMap{tree: tree}, acc, fun) do
++    reduce_iterator(:gb_trees.iterator(tree), acc, fun)
+   end
+
+   @doc """
+@@ -45,7 +42,7 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
+   Checks for membership of a given key–value pair in the SortedMap.
+
+   This function is invoked by `Enum.member?/2`. It returns `{:ok, true}` if the key exists
+-  in the map (ignoring the value), otherwise `{:ok, false}`.
++  and both the stored key and value match strictly (`===`), otherwise `{:ok, false}`.
+
+   ## Examples
+
+@@ -54,19 +51,26 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
+       true
+       iex> Enum.member?(map, {:c, 3})
+       false
++      iex> Enum.member?(map, {:a, 1.0})
++      false
+   """
+-  @spec member?(OrderedCollections.SortedMap.t(), {any(), any()}) :: {:ok, boolean()}
+-  def member?(%SortedMap{tree: tree}, {key, _value}) do
+-    {:ok, :gb_trees.is_defined(key, tree)}
++  @spec member?(OrderedCollections.SortedMap.t(), any()) :: {:ok, boolean()}
++  def member?(%SortedMap{tree: tree}, {key, _value} = pair) do
++    case :gb_trees.next(:gb_trees.iterator_from(key, tree)) do
++      {stored_key, stored_value, _iterator} -> {:ok, {stored_key, stored_value} === pair}
++      :none -> {:ok, false}
++    end
+   end
+
++  def member?(%SortedMap{}, _other), do: {:ok, false}
++
+   @doc """
+   Implements index-based slicing for the SortedMap.
+
+   This function is used by `Enum.slice/2` to extract a subrange from the SortedMap.
+   It returns a tuple `{:ok, count, slicer_fun}` where `count` is the total number of elements,
+-  and `slicer_fun` is a function that accepts `(start, length, step)` (with step ignored) and
+-  returns a list of key–value pairs starting at that index.
++  and `slicer_fun` accepts `(start, length, step)` and returns the requested
++  key–value pairs without traversing the remainder of the map.
+
+   ## Examples
+
+@@ -77,58 +81,54 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
+       [a: 1, b: 2, c: 3]
+   """
+   @spec slice(OrderedCollections.SortedMap.t()) :: {:ok, any(), (any(), any(), any() -> list())}
+-  def slice(%SortedMap{tree: {size, root}}) do
+-    slicer = fn start, length, _step ->
+-      {_, acc, _remaining} = collect_slice(root, start, length, 0, [])
+-      Enum.reverse(acc)
++  def slice(%SortedMap{tree: tree}) do
++    slicer = fn
++      _start, 0, _step ->
++        []
++
++      start, length, step ->
++        tree
++        |> :gb_trees.iterator()
++        |> skip(start)
++        |> take_slice(length, step, [])
+     end
+
+-    {:ok, size, slicer}
++    {:ok, :gb_trees.size(tree), slicer}
+   end
+
+-  defp traverse_tree(nil, acc, _fun), do: {:cont, acc}
++  defp reduce_iterator(_iterator, {:halt, acc}, _fun), do: {:halted, acc}
+
+-  defp traverse_tree({key, value, left, right}, acc, fun) do
+-    case traverse_tree(left, acc, fun) do
+-      {:cont, acc} ->
+-        case fun.({key, value}, acc) do
+-          {:cont, new_acc} -> traverse_tree(right, new_acc, fun)
+-          {:halt, final_acc} -> {:halted, final_acc}
+-          {:suspend, suspended_acc} -> {:suspended, suspended_acc, &traverse_tree(right, &1, fun)}
+-        end
++  defp reduce_iterator(iterator, {:suspend, acc}, fun),
++    do: {:suspended, acc, &reduce_iterator(iterator, &1, fun)}
+
+-      other ->
+-        other
++  defp reduce_iterator(iterator, {:cont, acc}, fun) do
++    case :gb_trees.next(iterator) do
++      :none -> {:done, acc}
++      {key, value, next} -> reduce_iterator(next, fun.({key, value}, acc), fun)
+     end
+   end
+
+-  # Base case: If we hit a nil node, return the current index, accumulator, and remaining length.
+-  defp collect_slice(nil, _start, length, index, acc) do
+-    {index, acc, length}
++  defp skip(iterator, 0), do: iterator
++
++  defp skip(iterator, count) do
++    case :gb_trees.next(iterator) do
++      :none -> iterator
++      {_, _, next} -> skip(next, count - 1)
++    end
+   end
+
+-  # In-order traversal: traverse left, process current node, then traverse right.
+-  defp collect_slice({key, value, left, right}, start, length, index, acc) do
+-    # Traverse the left subtree first.
+-    {index, acc, length} = collect_slice(left, start, length, index, acc)
+-
+-    new_index = index + 1
+-
+-    {acc, length} =
+-      if new_index > start and length > 0 do
+-        # We are past the start index and still need elements, so collect the current node.
+-        {[{key, value} | acc], length - 1}
+-      else
+-        # Otherwise, leave the accumulator and length unchanged.
+-        {acc, length}
+-      end
+-
+-    # If we've collected the required number of elements, stop traversing further.
+-    if length == 0 do
+-      {new_index, acc, length}
+-    else
+-      # Otherwise, continue with the right subtree.
+-      collect_slice(right, start, length, new_index, acc)
++  defp take_slice(_iterator, 0, _step, acc), do: Enum.reverse(acc)
++
++  defp take_slice(iterator, length, step, acc) do
++    case :gb_trees.next(iterator) do
++      :none ->
++        Enum.reverse(acc)
++
++      {key, value, _next} when length == 1 ->
++        Enum.reverse([{key, value} | acc])
++
++      {key, value, next} ->
++        take_slice(skip(next, step - 1), length - 1, step, [{key, value} | acc])
+     end
+   end
+ end
+diff --git a/lib/ordered_collections/enumerable/sorted_set.ex b/lib/ordered_collections/enumerable/sorted_set.ex
+index e599766..c84fd0e 100644
+--- a/lib/ordered_collections/enumerable/sorted_set.ex
++++ b/lib/ordered_collections/enumerable/sorted_set.ex
+@@ -4,11 +4,10 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
+   @type element() :: any()
+
+   @doc """
+-  Reduces the SortedSet using :gb_sets.fold.
++  Reduces the SortedSet in sorted order using a public Erlang iterator.
+
+-  This implementation unwraps the accumulator from the `{:cont, acc}` tuple,
+-  passes a plain accumulator to :gb_sets.fold/3, and then wraps the result back
+-  in `{:cont, result}`.
++  Supports continuation, early halt, and suspension with resumable iterator state.
++  Exhaustion returns `{:done, accumulator}`.
+
+   ## Examples
+
+@@ -16,35 +15,18 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
+       iex> Enum.reduce(set, 0, fn x, acc -> x + acc end)
+       6
+   """
+-  @spec reduce(OrderedCollections.SortedSet.t(), {:cont, any()}, any()) ::
+-          {:cont, any()}
+-          | {:halted, any()}
+-          | {:suspended, any(), (any() -> {any(), any()} | {any(), any(), any()})}
+-  def reduce(%SortedSet{set: set}, {:cont, acc}, fun) do
+-    result =
+-      :gb_sets.fold(
+-        fn element, acc ->
+-          case fun.(element, acc) do
+-            {:cont, new_acc} -> new_acc
+-          end
+-        end,
+-        acc,
+-        set
+-      )
+-
+-    {:cont, result}
++  @spec reduce(SortedSet.t(), Enumerable.acc(), Enumerable.reducer()) :: Enumerable.result()
++  def reduce(%SortedSet{set: set}, acc, fun) do
++    reduce_iterator(:gb_sets.iterator(set), acc, fun)
+   end
+
+-  def reduce(_, {:halt, acc}, _fun), do: {:halted, acc}
+-  def reduce(set, {:suspend, acc}, fun), do: {:suspended, acc, &reduce(set, &1, fun)}
+-
+   def count(%SortedSet{set: set}) do
+     {:ok, :gb_sets.size(set)}
+   end
+
+-  @spec member?(OrderedCollections.SortedSet.t(), any()) :: {:ok, boolean()}
+   @doc """
+-  Implementation of member? for the Enumerable implementation of SortedSet.
++  Checks membership with strict equality (`===`). Unlike `SortedSet.member?/2`,
++  numeric equivalents must match the stored representation.
+
+   ## Examples
+
+@@ -53,14 +35,19 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
+       true
+       iex> Enum.member?(set, 4)
+       false
++      iex> Enum.member?(set, 1.0)
++      false
+   """
+   @spec member?(OrderedCollections.SortedSet.t(), any()) :: {:ok, boolean()}
+   def member?(%SortedSet{set: set}, value) do
+-    {:ok, :gb_sets.is_member(value, set)}
++    case :gb_sets.next(:gb_sets.iterator_from(value, set)) do
++      {stored, _iterator} -> {:ok, stored === value}
++      :none -> {:ok, false}
++    end
+   end
+
+   @doc """
+-  Implementation of slice for the Enumerable implementation of SortedSet.
++  Returns a bounded iterator slicer supporting start, length, and step.
+
+   ## Examples
+
+@@ -70,13 +57,48 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
+
+   """
+   def slice(%SortedSet{set: set}) do
+-    sorted_list = :gb_sets.to_list(set)
+-    count = length(sorted_list)
++    slicer = fn
++      _start, 0, _step ->
++        []
++
++      start, length, step ->
++        set
++        |> :gb_sets.iterator()
++        |> skip(start)
++        |> take_slice(length, step, [])
++    end
++
++    {:ok, :gb_sets.size(set), slicer}
++  end
++
++  defp reduce_iterator(_iterator, {:halt, acc}, _fun), do: {:halted, acc}
++
++  defp reduce_iterator(iterator, {:suspend, acc}, fun),
++    do: {:suspended, acc, &reduce_iterator(iterator, &1, fun)}
++
++  defp reduce_iterator(iterator, {:cont, acc}, fun) do
++    case :gb_sets.next(iterator) do
++      :none -> {:done, acc}
++      {element, next} -> reduce_iterator(next, fun.(element, acc), fun)
++    end
++  end
++
++  defp skip(iterator, 0), do: iterator
+
+-    slicer = fn start, length, _step ->
+-      Enum.slice(sorted_list, start, length)
++  defp skip(iterator, count) do
++    case :gb_sets.next(iterator) do
++      :none -> iterator
++      {_, next} -> skip(next, count - 1)
+     end
++  end
+
+-    {:ok, count, slicer}
++  defp take_slice(_iterator, 0, _step, acc), do: Enum.reverse(acc)
++
++  defp take_slice(iterator, length, step, acc) do
++    case :gb_sets.next(iterator) do
++      :none -> Enum.reverse(acc)
++      {element, _next} when length == 1 -> Enum.reverse([element | acc])
++      {element, next} -> take_slice(skip(next, step - 1), length - 1, step, [element | acc])
++    end
+   end
+ end
+diff --git a/lib/ordered_collections/sorted_map.ex b/lib/ordered_collections/sorted_map.ex
+index b50c4c9..d2b48aa 100644
+--- a/lib/ordered_collections/sorted_map.ex
++++ b/lib/ordered_collections/sorted_map.ex
+@@ -1,9 +1,8 @@
+ defmodule OrderedCollections.SortedMap do
+   alias __MODULE__, as: SortedMap
+-  alias OrderedCollections.SortedSet
+
+   @moduledoc """
+-  A sorted key-value store implemented using Erlang's `:gb_trees` (Red-Black Trees).
++  A sorted key-value store implemented using Erlang's `:gb_trees`.
+
+   This module stores items in sorted order by their keys and offers a rich set of features that allow it to integrate seamlessly with Elixir’s core protocols:
+
+@@ -66,7 +65,7 @@ defmodule OrderedCollections.SortedMap do
+       %{}
+   """
+   @spec new() :: SortedMap.t()
+-  def new(), do: %__MODULE__{}
++  def new(), do: %__MODULE__{tree: :gb_trees.empty()}
+
+   @doc """
+   Creates a new sorted map from a standard map.
+@@ -109,8 +108,8 @@ defmodule OrderedCollections.SortedMap do
+       [1, 2, 3]
+   """
+   @spec values(SortedMap.t()) :: list()
+-  def values(sorted_map = %__MODULE__{}) do
+-    sorted_map |> Enum.map(fn {_, v} -> v end)
++  def values(%__MODULE__{tree: tree}) do
++    :gb_trees.values(tree)
+   end
+
+   @doc """
+@@ -139,18 +138,13 @@ defmodule OrderedCollections.SortedMap do
+       2
+   """
+   @spec put(SortedMap.t(), any(), any()) :: SortedMap.t()
+-  def put(%SortedMap{tree: tree} = map, key, value) do
+-    try do
+-      %SortedMap{tree: :gb_trees.insert(key, value, tree)}
+-    rescue
+-      _ ->
+-        %SortedMap{map | tree: :gb_trees.enter(key, value, tree)}
+-    end
++  def put(%SortedMap{tree: tree}, key, value) do
++    %SortedMap{tree: :gb_trees.enter(key, value, tree)}
+   end
+
+   @doc """
+   Updates a key with a function. If the key doesn’t exist,
+-  it is set to `nil`.
++  it is set to `nil`. An existing `nil` value is passed to the function.
+
+   ## Examples
+
+@@ -161,22 +155,19 @@ defmodule OrderedCollections.SortedMap do
+
+       iex> SortedMap.new(%{a: 1}) |> SortedMap.update(:b, &(&1 + 1)) |> SortedMap.get(:b)
+       nil
++
++      iex> SortedMap.new(%{a: nil}) |> SortedMap.update(:a, fn nil -> :updated end) |> SortedMap.get(:a)
++      :updated
+   """
+
+   @spec update(SortedMap.t(), any(), (any() -> any())) :: t()
+   def update(%__MODULE__{} = map, key, fun) do
+-    # Get the current value for the key
+-    case get(map, key) do
+-      # If the key doesn't exist, set it to nil
+-      nil -> put(map, key, nil)
+-      # Otherwise, update the value with the function
+-      val -> put(map, key, fun.(val))
+-    end
++    update(map, key, fun, nil)
+   end
+
+   @doc """
+   Updates a key with a function. If the key doesn’t exist,
+-  it sets it to `default`.
++  it sets it to `default`. An existing `nil` value is passed to the function.
+
+   ## Examples
+
+@@ -189,10 +180,10 @@ defmodule OrderedCollections.SortedMap do
+       10
+   """
+   @spec update(SortedMap.t(), any(), (any() -> any()), any()) :: t()
+-  def update(%__MODULE__{} = map, key, fun, default) do
+-    case get(map, key) do
+-      nil -> put(map, key, default)
+-      val -> put(map, key, fun.(val))
++  def update(%__MODULE__{tree: tree} = map, key, fun, default) do
++    case :gb_trees.lookup(key, tree) do
++      :none -> put(map, key, default)
++      {:value, val} -> put(map, key, fun.(val))
+     end
+   end
+
+@@ -346,10 +337,8 @@ defmodule OrderedCollections.SortedMap do
+       %{a: 2, b: 1}
+   """
+   @spec to_map(SortedMap.t()) :: map()
+-  def to_map(sorted_map) do
+-    SortedMap.to_list(sorted_map)
+-    |> SortedSet.new()
+-    |> Enum.into(Map.new())
++  def to_map(%SortedMap{tree: tree}) do
++    Map.new(:gb_trees.to_list(tree))
+   end
+
+   @doc """
+@@ -364,12 +353,14 @@ defmodule OrderedCollections.SortedMap do
+   """
+   @spec range(SortedMap.t(), any(), any()) :: [{any(), any()}]
+   def range(%SortedMap{tree: tree}, min, max) do
+-    tree
+-    |> :gb_trees.to_list()
+-    |> Enum.reduce([], fn {key, value}, acc ->
+-      if key >= min and key <= max, do: [{key, value} | acc], else: acc
+-    end)
+-    |> Enum.reverse()
++    collect_range(:gb_trees.iterator_from(min, tree), max, [])
++  end
++
++  defp collect_range(iterator, max, acc) do
++    case :gb_trees.next(iterator) do
++      {key, value, next} when key <= max -> collect_range(next, max, [{key, value} | acc])
++      _ -> Enum.reverse(acc)
++    end
+   end
+
+   @doc """
+diff --git a/lib/ordered_collections/sorted_set.ex b/lib/ordered_collections/sorted_set.ex
+index f955249..72f69a0 100644
+--- a/lib/ordered_collections/sorted_set.ex
++++ b/lib/ordered_collections/sorted_set.ex
+@@ -55,7 +55,7 @@ defmodule OrderedCollections.SortedSet do
+
+   alias __MODULE__, as: SortedSet
+
+-  @opaque t :: %SortedSet{set: element()}
++  @opaque t :: %SortedSet{set: :gb_sets.set()}
+   defstruct set: :gb_sets.empty()
+
+   @type non_empty_t() :: %__MODULE__{
+@@ -79,7 +79,10 @@ defmodule OrderedCollections.SortedSet do
+   def new(), do: %SortedSet{set: :gb_sets.empty()}
+
+   @doc """
+-  Creates a new SortedSet from a list.
++  Creates a new SortedSet from an enumerable, ignoring duplicate elements.
++
++  Lists use `:gb_sets.from_list/1`; other enumerables add elements incrementally.
++  Numeric equivalents such as `1` and `1.0` occupy a single position.
+
+   ## Examples
+
+@@ -90,19 +93,22 @@ defmodule OrderedCollections.SortedSet do
+       iex> map_set = MapSet.new([3, 1, 2])
+       iex> OrderedCollections.SortedSet.new(map_set)
+       #SortedSet<[1, 2, 3]>
++
++      iex> OrderedCollections.SortedSet.new([3, 1, 3, 2]) |> OrderedCollections.SortedSet.to_list()
++      [1, 2, 3]
+   """
+-  @spec new(list()) :: SortedSet.t()
++  @spec new(Enumerable.t()) :: SortedSet.t()
+   def new(list) when is_list(list) do
+-    %SortedSet{set: Enum.reduce(list, :gb_sets.empty(), &:gb_sets.insert/2)}
++    %SortedSet{set: :gb_sets.from_list(list)}
+   end
+
+   def new(enum) do
+     if Enumerable.impl_for(enum) do
+       %SortedSet{
+-        set: Enum.reduce(enum, :gb_sets.empty(), &:gb_sets.insert/2)
++        set: Enum.reduce(enum, :gb_sets.empty(), &:gb_sets.add/2)
+       }
+     else
+-      raise FunctionClauseError, "Expected an enumerable, got: #{inspect(enum)}"
++      raise FunctionClauseError, module: __MODULE__, function: :new, arity: 1
+     end
+   end
+
+@@ -121,10 +127,7 @@ defmodule OrderedCollections.SortedSet do
+   """
+   @spec add(SortedSet.t(), element()) :: SortedSet.t()
+   def add(%SortedSet{set: set}, value) do
+-    case SortedSet.member?(%SortedSet{set: set}, value) do
+-      true -> %SortedSet{set: set}
+-      false -> %SortedSet{set: :gb_sets.insert(value, set)}
+-    end
++    %SortedSet{set: :gb_sets.add(value, set)}
+   end
+
+   @doc """
+@@ -201,7 +204,7 @@ defmodule OrderedCollections.SortedSet do
+   end
+
+   @doc """
+-  Returns a list of elements in the SortedSet that fall within the given range (inclusive).
++  Returns a SortedSet of elements that fall within the given range (inclusive).
+
+   ## Examples
+
+@@ -211,13 +214,15 @@ defmodule OrderedCollections.SortedSet do
+   """
+   @spec range(SortedSet.t(), element(), element()) :: SortedSet.t()
+   def range(%SortedSet{set: set}, min, max) do
+-    fold(%SortedSet{set: set}, SortedSet.new(), fn elem, acc ->
+-      if elem >= min and elem <= max do
+-        SortedSet.add(acc, elem)
+-      else
+-        acc
+-      end
+-    end)
++    elements = collect_range(:gb_sets.iterator_from(min, set), max, [])
++    %SortedSet{set: :gb_sets.from_ordset(elements)}
++  end
++
++  defp collect_range(iterator, max, acc) do
++    case :gb_sets.next(iterator) do
++      {element, next} when element <= max -> collect_range(next, max, [element | acc])
++      _ -> Enum.reverse(acc)
++    end
+   end
+
+   @doc """
+diff --git a/mix.exs b/mix.exs
+index 6cb4775..fd8d5cb 100644
+--- a/mix.exs
++++ b/mix.exs
+@@ -6,6 +6,7 @@ defmodule OrderedCollections.MixProject do
+       app: :ordered_collections,
+       version: "0.3.3",
+       elixir: "~> 1.18",
++      elixirc_paths: elixirc_paths(Mix.env()),
+       start_permanent: Mix.env() == :prod,
+       deps: deps(),
+       description: "SortedMap and SortedSet implementations for Elixir",
+@@ -13,6 +14,9 @@ defmodule OrderedCollections.MixProject do
+     ]
+   end
+
++  defp elixirc_paths(:test), do: ["lib", "test/support"]
++  defp elixirc_paths(_), do: ["lib"]
++
+   # Run "mix help compile.app" to learn about applications.
+   def application do
+     [

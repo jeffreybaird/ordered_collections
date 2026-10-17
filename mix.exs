@@ -5,13 +5,17 @@ defmodule OrderedCollections.MixProject do
     [
       app: :ordered_collections,
       version: "0.3.3",
-      elixir: "~> 1.18",
+      elixir: "~> 1.19 and >= 1.19.5",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "SortedMap and SortedSet implementations for Elixir",
       package: package()
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help compile.app" to learn about applications.
   def application do

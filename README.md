@@ -13,7 +13,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Fast lookups using `:gb_trees`
   - Range queries over keys.
   - Conversion to standard Elixir `Map` or list.
-  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
+  - Implements `Enum`, `Collectable`, `Inspect` and the native `JSON.Encoder` protocol
 
 - **SortedSet**
   - Maintain a set of unique elements in sorted order.
@@ -21,9 +21,12 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Union, intersection, and difference operations.
   - Range queries over elements.
   - Conversion to a standard Elixir `MapSet` or list.
-  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
+  - Implements `Enum`, `Collectable`, `Inspect` and the native `JSON.Encoder` protocol
 
 ## Installation
+
+This checkout requires Elixir 1.19.5 or later in the 1.x series.
+See the [changelog](CHANGELOG.md) for compatibility changes awaiting release.
 
 Add `ordered_collections` to your list of dependencies in `mix.exs`:
 
@@ -34,6 +37,19 @@ def deps do
   ]
 end
 ```
+
+## Equality and enumeration
+
+Collection operations retain Erlang tree equality: numeric equivalents such as
+`1` and `1.0` occupy one set element or map key. `SortedSet.member?/2` and map
+key lookups use that equality. `Enum.member?/2` follows Elixir's strict `===`
+contract instead, comparing the stored element or the complete `{key, value}`
+pair. For example, `SortedSet.member?(SortedSet.new([1]), 1.0)` is true, while
+`Enum.member?(SortedSet.new([1]), 1.0)` is false.
+
+Both collections support early termination, suspension and resumption, and
+stepped `Enum.slice/2` ranges. Range queries include both boundaries;
+`SortedSet.range/3` returns a set and `SortedMap.range/3` returns a list of pairs.
 
 ## Benchmarks
 ### Running Benchmarks
@@ -55,6 +71,24 @@ or
   mix run bench/sorted_collections/<set|map>/<delete|insert|lookup|range>/bench.exs
 
 Benchmarks are configured using [Benchee](https://github.com/bencheeorg/benchee). Feel free to modify the benchmark settings in the respective files as needed.
+
+### Revision comparison
+
+Run `bash bench/comparison.sh /tmp/ordered-collections-comparison` with a new
+output directory to compare the working tree against the recorded original
+revision and equivalent raw Erlang operations. The harness saves JSON statistics,
+runtime/source metadata, allocation measurements, and correctness failures.
+Use `BASELINE_REVISION` to select another baseline, `BENCH_SIZES` for comma-separated
+sizes, and `BENCH_TIME`, `BENCH_WARMUP`, and `BENCH_MEMORY` for durations in seconds.
+`BENCH_FILTER` optionally selects jobs with a regular expression.
+
+See the [correctness review](.docs/review-results.md) for the original comparison
+and the [traversal performance follow-up](.docs/traversal-performance.md) for
+measurements against the corrected iterator implementation. Reproduce the latter
+with `bash bench/traversal_compare.sh /tmp/ordered-traversal-comparison`, using a
+new output directory. Both reports include limitations and reproduction commands.
+The historical results below
+use a different runtime and workload and are not directly comparable.
 
 ### Pre-executed Benchmarks
 Below are the benchmark results for various map and set operations. Each section details the environment, benchmark configuration, results, and comparisons.

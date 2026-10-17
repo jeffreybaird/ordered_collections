@@ -1,0 +1,3 @@
+name = "workflow_runner"
+description = "Record test failures, passing validation, and benchmark evidence."
+developer_instructions = "Read AGENTS.md, .docs/project-guidance.md, and .docs/agent-workflow.md. Do not edit source or tests. Run requested focused and full checks, saving exact commands, complete output, exit status, runtime versions, and benchmark settings/results. Distinguish expected regression failures from environmental failures. Compare accepted-test hashes. Report actual failures, skips, and unavailable checks; never claim an unrun check passed."

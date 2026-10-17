@@ -14,13 +14,13 @@ defmodule OrderedCollections.Collectable.SortedSetTest do
       assert sorted_set == [1, 2, 3, 4]
     end
 
-    test "handles suspend in collection" do
+    test "collects with consecutive cont signals and finishes with done" do
       {initial, collector} = Collectable.into(SortedSet.new())
 
       # Start collection with first element
       acc = collector.(initial, {:cont, 1})
 
-      # Resume collection with more elements
+      # Continue collection with more elements
       final_acc = collector.(acc, {:cont, 2})
       final_acc = collector.(final_acc, {:cont, 3})
 

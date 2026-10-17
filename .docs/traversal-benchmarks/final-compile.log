@@ -1,0 +1,12 @@
+$ mix compile --warnings-as-errors
+Compiling 3 files (.ex)
+Generated ordered_collections app
+
+EXIT_STATUS=0
+
+After private reduce_set opaque inference repair
+$ mix compile --warnings-as-errors
+Compiling 1 file (.ex)
+Generated ordered_collections app
+
+EXIT_STATUS=0

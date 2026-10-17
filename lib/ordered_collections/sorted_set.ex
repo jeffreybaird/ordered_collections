@@ -13,6 +13,12 @@ defmodule OrderedCollections.SortedSet do
     SortedSet implements the Enumerable protocol. This means you can traverse the set using functions
     like `Enum.map/2`, `Enum.reduce/3`, and `Enum.slice/2`, all while preserving the sorted order of elements.
 
+    Full reductions use `:gb_sets.fold/3` to reduce iterator allocation. Early halt unwinds
+    that fold, and the first callback suspension performs an additional O(log n) tree seek
+    before switching to an iterator. Small-prefix operations such as `Enum.take/2` and
+    `Enum.find/2` can therefore have higher fixed overhead than iterator-only traversal.
+    Subsequent resumptions continue from the saved iterator.
+
     **Example:**
         iex> set = SortedSet.new([3, 1, 2])
         iex> Enum.map(set, &(&1 * 2))
@@ -21,6 +27,10 @@ defmodule OrderedCollections.SortedSet do
   - **Collectable:**
     SortedSet implements the Collectable protocol, allowing you to build a SortedSet from any enumerable
     using `Enum.into/2`.
+
+    When driving `Collectable.into/1` manually, treat its initial and intermediate
+    accumulators as opaque state and pass them only to the returned collector. They
+    are not SortedSets; the `:done` command returns the completed SortedSet.
 
     **Example:**
         iex> set = Enum.into([3, 1, 2], SortedSet.new())
@@ -38,7 +48,7 @@ defmodule OrderedCollections.SortedSet do
         ~s(#SortedSet<[1, 2, 3]>\\n)
 
   - **JSON Encoding:**
-    SortedSet implements the JSON.Encoder protocol (using Elixir 1.18's native JSON support) so that
+    SortedSet implements Elixir's native JSON.Encoder protocol so that
     when you encode a SortedSet to JSON, it is represented as an array with the elements in sorted order.
 
     **Example:**
@@ -55,7 +65,7 @@ defmodule OrderedCollections.SortedSet do
 
   alias __MODULE__, as: SortedSet
 
-  @opaque t :: %SortedSet{set: element()}
+  @opaque t :: %SortedSet{set: :gb_sets.set()}
   defstruct set: :gb_sets.empty()
 
   @type non_empty_t() :: %__MODULE__{
@@ -79,7 +89,10 @@ defmodule OrderedCollections.SortedSet do
   def new(), do: %SortedSet{set: :gb_sets.empty()}
 
   @doc """
-  Creates a new SortedSet from a list.
+  Creates a new SortedSet from an enumerable, ignoring duplicate elements.
+
+  Lists use `:gb_sets.from_list/1`; other enumerables add elements incrementally.
+  Numeric equivalents such as `1` and `1.0` occupy a single position.
 
   ## Examples
 
@@ -90,19 +103,22 @@ defmodule OrderedCollections.SortedSet do
       iex> map_set = MapSet.new([3, 1, 2])
       iex> OrderedCollections.SortedSet.new(map_set)
       #SortedSet<[1, 2, 3]>
+
+      iex> OrderedCollections.SortedSet.new([3, 1, 3, 2]) |> OrderedCollections.SortedSet.to_list()
+      [1, 2, 3]
   """
-  @spec new(list()) :: SortedSet.t()
+  @spec new(Enumerable.t()) :: SortedSet.t()
   def new(list) when is_list(list) do
-    %SortedSet{set: Enum.reduce(list, :gb_sets.empty(), &:gb_sets.insert/2)}
+    %SortedSet{set: :gb_sets.from_list(list)}
   end
 
   def new(enum) do
     if Enumerable.impl_for(enum) do
       %SortedSet{
-        set: Enum.reduce(enum, :gb_sets.empty(), &:gb_sets.insert/2)
+        set: Enum.reduce(enum, :gb_sets.empty(), &:gb_sets.add/2)
       }
     else
-      raise FunctionClauseError, "Expected an enumerable, got: #{inspect(enum)}"
+      raise FunctionClauseError, module: __MODULE__, function: :new, arity: 1
     end
   end
 
@@ -121,10 +137,7 @@ defmodule OrderedCollections.SortedSet do
   """
   @spec add(SortedSet.t(), element()) :: SortedSet.t()
   def add(%SortedSet{set: set}, value) do
-    case SortedSet.member?(%SortedSet{set: set}, value) do
-      true -> %SortedSet{set: set}
-      false -> %SortedSet{set: :gb_sets.insert(value, set)}
-    end
+    %SortedSet{set: :gb_sets.add(value, set)}
   end
 
   @doc """
@@ -201,7 +214,7 @@ defmodule OrderedCollections.SortedSet do
   end
 
   @doc """
-  Returns a list of elements in the SortedSet that fall within the given range (inclusive).
+  Returns a SortedSet of elements that fall within the given range (inclusive).
 
   ## Examples
 
@@ -211,13 +224,15 @@ defmodule OrderedCollections.SortedSet do
   """
   @spec range(SortedSet.t(), element(), element()) :: SortedSet.t()
   def range(%SortedSet{set: set}, min, max) do
-    fold(%SortedSet{set: set}, SortedSet.new(), fn elem, acc ->
-      if elem >= min and elem <= max do
-        SortedSet.add(acc, elem)
-      else
-        acc
-      end
-    end)
+    elements = collect_range(:gb_sets.iterator_from(min, set), max, [])
+    %SortedSet{set: :gb_sets.from_ordset(elements)}
+  end
+
+  defp collect_range(iterator, max, acc) do
+    case :gb_sets.next(iterator) do
+      {element, next} when element <= max -> collect_range(next, max, [element | acc])
+      _ -> Enum.reverse(acc)
+    end
   end
 
   @doc """

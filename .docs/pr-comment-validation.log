@@ -1,0 +1,509 @@
+PR comment validation. Earlier failures are retained before subsequent passing runs.
+
+=== numeric-baseline-green.log ===
+Library docs/typespec edits already present; no runtime function-body changes. See gate-source-diff.patch.
+$ mix test test/ordered_collections/collection_regression_test.exs --trace
+Compiling 3 files (.ex)
+Generated ordered_collections app
+Running ExUnit with seed: 326469, max_cases: 1
+
+
+OrderedCollections.CollectionRegressionTest [test/ordered_collections/collection_regression_test.exs]
+  * test map conversions retain keys, nil values, and values in key order [L#99]
+  * test map conversions retain keys, nil values, and values in key order (0.00ms) [L#99]
+  * test set insertion preserves stored representatives on numeric hits and adds misses [L#43]
+  * test set insertion preserves stored representatives on numeric hits and adds misses (0.00ms) [L#43]
+  * test enumerable construction retains the stored numeric representative for either input order [L#23]
+  * test enumerable construction retains the stored numeric representative for either input order (0.00ms) [L#23]
+  * test set construction accepts repeated elements from a list [L#6]
+  * test set construction accepts repeated elements from a list (0.3ms) [L#6]
+  * test map ranges distinguish full bounds from ranges excluding an endpoint after many inserts [L#134]
+  * test map ranges distinguish full bounds from ranges excluding an endpoint after many inserts (0.1ms) [L#134]
+  * test set collection preserves initial representatives and deduplicates incoming values [L#194]
+  * test set collection preserves initial representatives and deduplicates incoming values (0.6ms) [L#194]
+  * test list construction retains the stored numeric representative for either input order [L#18]
+  * test list construction retains the stored numeric representative for either input order (0.00ms) [L#18]
+  * test missing map updates insert their documented defaults without invoking the callback [L#86]
+  * test missing map updates insert their documented defaults without invoking the callback (0.00ms) [L#86]
+  * test update/3 invokes the callback on an existing nil value [L#51]
+  * test update/3 invokes the callback on an existing nil value (0.00ms) [L#51]
+  * test map range extrema handle singleton and empty maps with strict numeric representatives [L#159]
+  * test map range extrema handle singleton and empty maps with strict numeric representatives (0.00ms) [L#159]
+  * test update/4 invokes the callback on an existing nil value instead of using the default [L#66]
+  * test update/4 invokes the callback on an existing nil value instead of using the default (0.2ms) [L#66]
+  * test set construction accepts repeated elements from a non-list enumerable [L#12]
+  * test set construction accepts repeated elements from a non-list enumerable (0.00ms) [L#12]
+  * test set ranges return sets and retain stored representatives at inclusive bounds [L#173]
+  * test set ranges return sets and retain stored representatives at inclusive bounds (0.00ms) [L#173]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds [L#110]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds (0.00ms) [L#110]
+  * test set construction maintains strict representatives and uniqueness among mixed nested terms [L#28]
+  * test set construction maintains strict representatives and uniqueness among mixed nested terms (0.01ms) [L#28]
+  * test map collection preserves initial entries and the last value for equivalent keys wins [L#202]
+  * test map collection preserves initial entries and the last value for equivalent keys wins (0.2ms) [L#202]
+
+Finished in 0.04 seconds (0.04s async, 0.00s sync)
+16 tests, 0 failures
+
+EXIT_STATUS=0
+
+=== script-baseline-red.log ===
+Library docs/typespec edits already present; no runtime function-body changes. See gate-source-diff.patch.
+$ mix test test/bench/traversal_compare_test.exs --trace
+Running ExUnit with seed: 672162, max_cases: 1
+
+
+OrderedCollections.TraversalCompareTest [test/bench/traversal_compare_test.exs]
+  * test missing baseline commit gives fetch guidance before invoking mix [L#67]
+  * test missing baseline commit gives fetch guidance before invoking mix (122.2ms) [L#67]
+
+  1) test missing baseline commit gives fetch guidance before invoking mix (OrderedCollections.TraversalCompareTest)
+     test/bench/traversal_compare_test.exs:67
+     Assertion with =~ failed
+     code:  assert output =~ missing
+     left:  "fatal: not a tree object: 61ca0f5c50dbdbc8db78b09c9f0dc32006fb9b49\n"
+     right: "ffffffffffffffffffffffffffffffffffffffff"
+     stacktrace:
+       test/bench/traversal_compare_test.exs:72: (test)
+
+  * test a valid but altered patch is rejected by source checksums before invoking mix [L#78]
+  * test a valid but altered patch is rejected by source checksums before invoking mix (125.2ms) [L#78]
+
+  2) test a valid but altered patch is rejected by source checksums before invoking mix (OrderedCollections.TraversalCompareTest)
+     test/bench/traversal_compare_test.exs:78
+     Assertion with =~ failed
+     code:  assert output =~ ~r/(checksum|sha256|integrity|manifest|verification|FAILED)/i
+     left:  "fatal: not a tree object: 61ca0f5c50dbdbc8db78b09c9f0dc32006fb9b49\n"
+     right: ~r/(checksum|sha256|integrity|manifest|verification|FAILED)/i
+     stacktrace:
+       test/bench/traversal_compare_test.exs:85: (test)
+
+  * test a different baseline revision must still reconstruct the recorded source checksums [L#89]
+  * test a different baseline revision must still reconstruct the recorded source checksums (171.5ms) [L#89]
+
+  3) test a different baseline revision must still reconstruct the recorded source checksums (OrderedCollections.TraversalCompareTest)
+     test/bench/traversal_compare_test.exs:89
+     Assertion with =~ failed
+     code:  assert output =~ ~r/(checksum|sha256|integrity|manifest|verification|FAILED)/i
+     left:  "fatal: not a tree object: 61ca0f5c50dbdbc8db78b09c9f0dc32006fb9b49\n"
+     right: ~r/(checksum|sha256|integrity|manifest|verification|FAILED)/i
+     stacktrace:
+       test/bench/traversal_compare_test.exs:111: (test)
+
+  * test a valid revision, patch, and source manifest allow both benchmark runs [L#115]
+  * test a valid revision, patch, and source manifest allow both benchmark runs (130.8ms) [L#115]
+
+  4) test a valid revision, patch, and source manifest allow both benchmark runs (OrderedCollections.TraversalCompareTest)
+     test/bench/traversal_compare_test.exs:115
+     fatal: not a tree object: 61ca0f5c50dbdbc8db78b09c9f0dc32006fb9b49
+
+     code: assert status == 0, output
+     stacktrace:
+       test/bench/traversal_compare_test.exs:118: (test)
+
+
+Finished in 0.6 seconds (0.6s async, 0.00s sync)
+4 tests, 4 failures
+
+EXIT_STATUS=2
+
+=== final-script-guards.log ===
+$ mix test test/bench/traversal_compare_test.exs --trace
+Running ExUnit with seed: 495740, max_cases: 1
+
+
+OrderedCollections.TraversalCompareTest [test/bench/traversal_compare_test.exs]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix [L#115]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix (197.6ms) [L#115]
+  * test a valid but altered patch is rejected by source checksums before invoking mix [L#78]
+  * test a valid but altered patch is rejected by source checksums before invoking mix (171.7ms) [L#78]
+  * test a different baseline revision must still reconstruct the recorded source checksums [L#89]
+  * test a different baseline revision must still reconstruct the recorded source checksums (189.3ms) [L#89]
+  * test missing baseline commit gives fetch guidance before invoking mix [L#67]
+  * test missing baseline commit gives fetch guidance before invoking mix (110.1ms) [L#67]
+  * test a valid revision, patch, and source manifest allow both benchmark runs [L#143]
+  * test a valid revision, patch, and source manifest allow both benchmark runs (150.1ms) [L#143]
+
+  1) test a valid revision, patch, and source manifest allow both benchmark runs (OrderedCollections.TraversalCompareTest)
+     test/bench/traversal_compare_test.exs:143
+     mix.exs: OK
+     lib/source_1.ex: FAILED
+     lib/source_2.ex: OK
+     lib/source_3.ex: OK
+     lib/source_4.ex: OK
+     lib/source_5.ex: OK
+     lib/source_6.ex: OK
+     lib/source_7.ex: OK
+     lib/source_8.ex: OK
+     lib/source_9.ex: OK
+     lib/source_10.ex: OK
+     lib/source_11.ex: OK
+     shasum: WARNING: 1 computed checksum did NOT match
+     Baseline checksum verification failed. No benchmarks were run.
+
+     code: assert status == 0, output
+     stacktrace:
+       test/bench/traversal_compare_test.exs:146: (test)
+
+
+Finished in 0.9 seconds (0.9s async, 0.00s sync)
+5 tests, 1 failure
+
+EXIT_STATUS=2
+
+After nested-checkout patch isolation fix
+$ mix test test/bench/traversal_compare_test.exs --trace
+Running ExUnit with seed: 689620, max_cases: 1
+
+
+OrderedCollections.TraversalCompareTest [test/bench/traversal_compare_test.exs]
+  * test a valid revision, patch, and source manifest allow both benchmark runs [L#143]
+  * test a valid revision, patch, and source manifest allow both benchmark runs (561.7ms) [L#143]
+  * test a valid but altered patch is rejected by source checksums before invoking mix [L#78]
+  * test a valid but altered patch is rejected by source checksums before invoking mix (176.8ms) [L#78]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix [L#115]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix (180.2ms) [L#115]
+  * test missing baseline commit gives fetch guidance before invoking mix [L#67]
+  * test missing baseline commit gives fetch guidance before invoking mix (105.9ms) [L#67]
+  * test a different baseline revision must still reconstruct the recorded source checksums [L#89]
+  * test a different baseline revision must still reconstruct the recorded source checksums (184.5ms) [L#89]
+
+Finished in 1.3 seconds (1.3s async, 0.00s sync)
+5 tests, 0 failures
+
+EXIT_STATUS=0
+
+=== final-full-test.log ===
+
+After nested-checkout patch isolation fix
+$ mix test
+Running ExUnit with seed: 299882, max_cases: 16
+
+............................................................................................................................................................................................................................................................................................
+Finished in 1.1 seconds (1.1s async, 0.00s sync)
+110 doctests, 174 tests, 0 failures
+
+EXIT_STATUS=0
+
+=== final-focused-trace.log ===
+
+After nested-checkout patch isolation fix
+$ mix test test/ordered_collections/enumerable test/ordered_collections/collectable test/ordered_collections/collection_regression_test.exs test/support_test.exs test/bench/traversal_compare_test.exs --trace
+Running ExUnit with seed: 735261, max_cases: 1
+
+
+DialyzerHelperTest [test/support_test.exs]
+  * doctest DialyzerHelper.dialyzer_warning_ignore/2 (2) [L#4]
+  * doctest DialyzerHelper.dialyzer_warning_ignore/2 (2) (2.4ms) [L#4]
+  * doctest DialyzerHelper.dialyzer_warning_ignore/2 (1) [L#4]
+  * doctest DialyzerHelper.dialyzer_warning_ignore/2 (1) (0.00ms) [L#4]
+
+OrderedCollections.Collectable.SortedSetTest [test/ordered_collections/collectable/sorted_set_test.exs]
+  * test into/1 maintains uniqueness during collection [L#56]
+  * test into/1 maintains uniqueness during collection (2.6ms) [L#56]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (3) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (3) (0.00ms) [L#4]
+  * test into/1 handles empty collection [L#50]
+  * test into/1 handles empty collection (0.00ms) [L#50]
+  * test into/1 collects with consecutive cont signals and finishes with done [L#17]
+  * test into/1 collects with consecutive cont signals and finishes with done (0.00ms) [L#17]
+  * test into/1 collects elements into a SortedSet with a custom initial value [L#12]
+  * test into/1 collects elements into a SortedSet with a custom initial value (0.00ms) [L#12]
+  * test into/1 handles halt in collection [L#33]
+  * test into/1 handles halt in collection (0.00ms) [L#33]
+  * test into/1 collects elements into a SortedSet [L#7]
+  * test into/1 collects elements into a SortedSet (0.00ms) [L#7]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (2) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (2) (0.00ms) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (1) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (1) (0.00ms) [L#4]
+
+OrderedCollections.Collectable.SortedMapTest [test/ordered_collections/collectable/sorted_map_test.exs]
+  * test into/1 raises error when collecting non-key-value pairs [L#53]
+  * test into/1 raises error when collecting non-key-value pairs (4.5ms) [L#53]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (3) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (3) (0.8ms) [L#4]
+  * test into/1 handles halt in collection [L#36]
+  * test into/1 handles halt in collection (0.00ms) [L#36]
+  * test into/1 collects elements into a SortedMap with a custom initial value [L#13]
+  * test into/1 collects elements into a SortedMap with a custom initial value (0.00ms) [L#13]
+  * test into/1 collects elements into a SortedMap [L#7]
+  * test into/1 collects elements into a SortedMap (0.00ms) [L#7]
+  * test into/1 collects with consecutive cont signals and finishes with done [L#19]
+  * test into/1 collects with consecutive cont signals and finishes with done (0.00ms) [L#19]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (4) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (4) (0.00ms) [L#4]
+  * test into/1 raises error when collecting invalid key-value pairs [L#65]
+  * test into/1 raises error when collecting invalid key-value pairs (0.01ms) [L#65]
+  * test into/1 handles empty collection [L#77]
+  * test into/1 handles empty collection (0.00ms) [L#77]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (2) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (2) (0.00ms) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (1) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (1) (0.00ms) [L#4]
+
+OrderedCollections.Enumerable.SortedSetTest [test/ordered_collections/enumerable/sorted_set_test.exs]
+  * doctest Enumerable.OrderedCollections.SortedSet.slice/1 (3) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.slice/1 (3) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedSet reduces a set of sets [L#31]
+  * test Enumerable implementation for SortedSet reduces a set of sets (0.00ms) [L#31]
+  * test Enumerable implementation for SortedSet Enum.member?/2 checks for key presence [L#17]
+  * test Enumerable implementation for SortedSet Enum.member?/2 checks for key presence (0.00ms) [L#17]
+  * test Enumerable implementation for SortedSet Handles and empty set [L#12]
+  * test Enumerable implementation for SortedSet Handles and empty set (0.00ms) [L#12]
+  * test Enumerable implementation for SortedSet Enum.reduce/3 iterates over elements [L#23]
+  * test Enumerable implementation for SortedSet Enum.reduce/3 iterates over elements (0.00ms) [L#23]
+  * test Enumerable implementation for SortedSet Enum.count/1 returns the number of elements [L#7]
+  * test Enumerable implementation for SortedSet Enum.count/1 returns the number of elements (0.00ms) [L#7]
+  * doctest Enumerable.OrderedCollections.SortedSet.member?/2 (2) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.member?/2 (2) (0.00ms) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.reduce/3 (1) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.reduce/3 (1) (0.00ms) [L#4]
+
+OrderedCollections.Enumerable.SortedMapTest [test/ordered_collections/enumerable/sorted_map_test.exs]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange even if key order is different than val order [L#33]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange even if key order is different than val order (0.00ms) [L#33]
+  * doctest Enumerable.OrderedCollections.SortedMap.member?/2 (3) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.member?/2 (3) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange [L#26]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange (0.00ms) [L#26]
+  * test Enumerable implementation for SortedMap Enum.member?/2 checks for key presence [L#12]
+  * test Enumerable implementation for SortedMap Enum.member?/2 checks for key presence (0.00ms) [L#12]
+  * test Enumerable implementation for SortedMap Enum.count/1 returns the number of elements [L#7]
+  * test Enumerable implementation for SortedMap Enum.count/1 returns the number of elements (0.00ms) [L#7]
+  * test Enumerable implementation for SortedMap Enum.reduce/3 iterates over elements [L#18]
+  * test Enumerable implementation for SortedMap Enum.reduce/3 iterates over elements (0.00ms) [L#18]
+  * doctest Enumerable.OrderedCollections.SortedMap.slice/1 (4) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.slice/1 (4) (0.00ms) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.count/1 (2) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.count/1 (2) (0.00ms) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.reduce/3 (1) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.reduce/3 (1) (0.00ms) [L#4]
+
+OrderedCollections.Enumerable.MembershipTest [test/ordered_collections/enumerable/membership_test.exs]
+  * test map membership uses strict equality for numeric keys [L#24]
+  * test map membership uses strict equality for numeric keys (0.00ms) [L#24]
+  * test set collection membership retains Erlang equality while Enum membership is strict [L#51]
+  * test set collection membership retains Erlang equality while Enum membership is strict (0.00ms) [L#51]
+  * test map membership uses strict equality for nested numeric keys and values [L#42]
+  * test map membership uses strict equality for nested numeric keys and values (0.00ms) [L#42]
+  * test set Enum membership is strict inside compound terms [L#63]
+  * test set Enum membership is strict inside compound terms (0.00ms) [L#63]
+  * test map membership uses strict equality for numeric values [L#34]
+  * test map membership uses strict equality for numeric values (0.00ms) [L#34]
+  * test map membership returns false for non-pairs [L#15]
+  * test map membership returns false for non-pairs (0.00ms) [L#15]
+  * test map membership requires the entire stored pair [L#6]
+  * test map membership requires the entire stored pair (0.00ms) [L#6]
+
+OrderedCollections.CollectionRegressionTest [test/ordered_collections/collection_regression_test.exs]
+  * test missing map updates insert their documented defaults without invoking the callback [L#86]
+  * test missing map updates insert their documented defaults without invoking the callback (0.00ms) [L#86]
+  * test list construction retains the stored numeric representative for either input order [L#18]
+  * test list construction retains the stored numeric representative for either input order (0.00ms) [L#18]
+  * test map range extrema handle singleton and empty maps with strict numeric representatives [L#159]
+  * test map range extrema handle singleton and empty maps with strict numeric representatives (0.00ms) [L#159]
+  * test map ranges distinguish full bounds from ranges excluding an endpoint after many inserts [L#134]
+  * test map ranges distinguish full bounds from ranges excluding an endpoint after many inserts (0.1ms) [L#134]
+  * test update/4 invokes the callback on an existing nil value instead of using the default [L#66]
+  * test update/4 invokes the callback on an existing nil value instead of using the default (0.00ms) [L#66]
+  * test set ranges return sets and retain stored representatives at inclusive bounds [L#173]
+  * test set ranges return sets and retain stored representatives at inclusive bounds (0.00ms) [L#173]
+  * test set insertion preserves stored representatives on numeric hits and adds misses [L#43]
+  * test set insertion preserves stored representatives on numeric hits and adds misses (0.00ms) [L#43]
+  * test set construction maintains strict representatives and uniqueness among mixed nested terms [L#28]
+  * test set construction maintains strict representatives and uniqueness among mixed nested terms (0.01ms) [L#28]
+  * test set collection preserves initial representatives and deduplicates incoming values [L#194]
+  * test set collection preserves initial representatives and deduplicates incoming values (0.00ms) [L#194]
+  * test update/3 invokes the callback on an existing nil value [L#51]
+  * test update/3 invokes the callback on an existing nil value (0.00ms) [L#51]
+  * test enumerable construction retains the stored numeric representative for either input order [L#23]
+  * test enumerable construction retains the stored numeric representative for either input order (0.00ms) [L#23]
+  * test map conversions retain keys, nil values, and values in key order [L#99]
+  * test map conversions retain keys, nil values, and values in key order (0.00ms) [L#99]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds [L#110]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds (0.00ms) [L#110]
+  * test map collection preserves initial entries and the last value for equivalent keys wins [L#202]
+  * test map collection preserves initial entries and the last value for equivalent keys wins (0.00ms) [L#202]
+  * test set construction accepts repeated elements from a non-list enumerable [L#12]
+  * test set construction accepts repeated elements from a non-list enumerable (0.00ms) [L#12]
+  * test set construction accepts repeated elements from a list [L#6]
+  * test set construction accepts repeated elements from a list (0.00ms) [L#6]
+
+OrderedCollections.TraversalCompareTest [test/bench/traversal_compare_test.exs]
+  * test a different baseline revision must still reconstruct the recorded source checksums [L#89]
+  * test a different baseline revision must still reconstruct the recorded source checksums (200.2ms) [L#89]
+  * test a valid revision, patch, and source manifest allow both benchmark runs [L#143]
+  * test a valid revision, patch, and source manifest allow both benchmark runs (348.7ms) [L#143]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix [L#115]
+  * test an extra baseline source absent from the manifest is rejected before invoking mix (199.5ms) [L#115]
+  * test a valid but altered patch is rejected by source checksums before invoking mix [L#78]
+  * test a valid but altered patch is rejected by source checksums before invoking mix (164.9ms) [L#78]
+  * test missing baseline commit gives fetch guidance before invoking mix [L#67]
+  * test missing baseline commit gives fetch guidance before invoking mix (112.7ms) [L#67]
+
+OrderedCollections.Enumerable.ContractTest [test/ordered_collections/enumerable/contract_test.exs]
+  * test OrderedCollections.SortedMap protocol contract nested halting reductions do not halt an outer reduction that later suspends [L#146]
+  * test OrderedCollections.SortedMap protocol contract nested halting reductions do not halt an outer reduction that later suspends (0.1ms) [L#146]
+  * test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion [L#28]
+  * test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion (0.00ms) [L#28]
+  * test OrderedCollections.SortedSet protocol contract callback continuation accepts halt and suspension without consuming an element [L#191]
+  * test OrderedCollections.SortedSet protocol contract callback continuation accepts halt and suspension without consuming an element (0.01ms) [L#191]
+  * test OrderedCollections.SortedMap protocol contract a continuation suspended after the last element still honors control signals [L#212]
+  * test OrderedCollections.SortedMap protocol contract a continuation suspended after the last element still honors control signals (0.00ms) [L#212]
+  * test OrderedCollections.SortedSet protocol contract middle suspensions resume long runs with replacement map accumulators [L#86]
+  * test OrderedCollections.SortedSet protocol contract middle suspensions resume long runs with replacement map accumulators (0.1ms) [L#86]
+  * test OrderedCollections.SortedSet protocol contract contiguous slices match ordered lists at negative and out-of-range indices [L#242]
+  * test OrderedCollections.SortedSet protocol contract contiguous slices match ordered lists at negative and out-of-range indices (0.00ms) [L#242]
+  * test OrderedCollections.SortedMap protocol contract callback continuation accepts halt and suspension without consuming an element [L#191]
+  * test OrderedCollections.SortedMap protocol contract callback continuation accepts halt and suspension without consuming an element (0.00ms) [L#191]
+  * test OrderedCollections.SortedSet protocol contract initial halt skips callbacks, including on an empty collection [L#20]
+  * test OrderedCollections.SortedSet protocol contract initial halt skips callbacks, including on an empty collection (0.00ms) [L#20]
+  * test OrderedCollections.SortedMap protocol contract callback exits propagate unchanged after continued elements [L#135]
+  * test OrderedCollections.SortedMap protocol contract callback exits propagate unchanged after continued elements (0.09ms) [L#135]
+  * test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends [L#221]
+  * test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends (0.03ms) [L#221]
+  * test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs [L#10]
+  * test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs (0.00ms) [L#10]
+  * test OrderedCollections.SortedMap protocol contract middle suspensions resume long runs with replacement map accumulators [L#86]
+  * test OrderedCollections.SortedMap protocol contract middle suspensions resume long runs with replacement map accumulators (0.1ms) [L#86]
+  * test OrderedCollections.SortedSet protocol contract repeated callback suspension retains every pending element in order [L#176]
+  * test OrderedCollections.SortedSet protocol contract repeated callback suspension retains every pending element in order (0.00ms) [L#176]
+  * test OrderedCollections.SortedMap protocol contract many continued callbacks can halt in the middle without visiting later elements [L#65]
+  * test OrderedCollections.SortedMap protocol contract many continued callbacks can halt in the middle without visiting later elements (0.1ms) [L#65]
+  * test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion [L#232]
+  * test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion (0.00ms) [L#232]
+  * test OrderedCollections.SortedSet protocol contract nested halting reductions do not halt an outer reduction that later suspends [L#146]
+  * test OrderedCollections.SortedSet protocol contract nested halting reductions do not halt an outer reduction that later suspends (0.1ms) [L#146]
+  * test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds [L#252]
+  * test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds (0.01ms) [L#252]
+  * test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends [L#221]
+  * test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends (0.01ms) [L#221]
+  * test OrderedCollections.SortedMap protocol contract Enum.take supports early termination and exhaustion [L#232]
+  * test OrderedCollections.SortedMap protocol contract Enum.take supports early termination and exhaustion (0.00ms) [L#232]
+  * test OrderedCollections.SortedSet protocol contract many continued callbacks can halt in the middle without visiting later elements [L#65]
+  * test OrderedCollections.SortedSet protocol contract many continued callbacks can halt in the middle without visiting later elements (0.1ms) [L#65]
+  * test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds [L#252]
+  * test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds (0.00ms) [L#252]
+  * test OrderedCollections.SortedMap protocol contract callback throws propagate unchanged after continued elements [L#123]
+  * test OrderedCollections.SortedMap protocol contract callback throws propagate unchanged after continued elements (0.1ms) [L#123]
+  * test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion [L#28]
+  * test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion (0.00ms) [L#28]
+  * test OrderedCollections.SortedMap protocol contract callback halt stops at the requested element [L#52]
+  * test OrderedCollections.SortedMap protocol contract callback halt stops at the requested element (0.00ms) [L#52]
+  * test OrderedCollections.SortedMap protocol contract callback exceptions propagate after continued elements [L#166]
+  * test OrderedCollections.SortedMap protocol contract callback exceptions propagate after continued elements (1.1ms) [L#166]
+  * test OrderedCollections.SortedSet protocol contract callback exceptions propagate after continued elements [L#166]
+  * test OrderedCollections.SortedSet protocol contract callback exceptions propagate after continued elements (0.08ms) [L#166]
+  * test OrderedCollections.SortedSet protocol contract a continuation suspended after the last element still honors control signals [L#212]
+  * test OrderedCollections.SortedSet protocol contract a continuation suspended after the last element still honors control signals (0.00ms) [L#212]
+  * test OrderedCollections.SortedSet protocol contract callback exits propagate unchanged after continued elements [L#135]
+  * test OrderedCollections.SortedSet protocol contract callback exits propagate unchanged after continued elements (0.07ms) [L#135]
+  * test OrderedCollections.SortedSet protocol contract callback throws propagate unchanged after continued elements [L#123]
+  * test OrderedCollections.SortedSet protocol contract callback throws propagate unchanged after continued elements (0.08ms) [L#123]
+  * test OrderedCollections.SortedSet protocol contract callback halt stops at the requested element [L#52]
+  * test OrderedCollections.SortedSet protocol contract callback halt stops at the requested element (0.00ms) [L#52]
+  * test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order [L#176]
+  * test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order (0.01ms) [L#176]
+  * test OrderedCollections.SortedMap protocol contract contiguous slices match ordered lists at negative and out-of-range indices [L#242]
+  * test OrderedCollections.SortedMap protocol contract contiguous slices match ordered lists at negative and out-of-range indices (0.01ms) [L#242]
+  * test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection [L#20]
+  * test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection (0.00ms) [L#20]
+  * test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs [L#10]
+  * test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs (0.00ms) [L#10]
+
+Finished in 1.1 seconds (1.1s async, 0.00s sync)
+16 doctests, 85 tests, 0 failures
+
+EXIT_STATUS=0
+
+=== final-format.log ===
+
+After nested-checkout patch isolation fix
+$ mix format --check-formatted
+
+EXIT_STATUS=0
+
+=== final-compile.log ===
+
+After nested-checkout patch isolation fix
+$ mix compile --warnings-as-errors
+Compiling 3 files (.ex)
+Generated ordered_collections app
+
+EXIT_STATUS=0
+
+=== final-dialyzer.log ===
+
+After nested-checkout patch isolation fix
+$ mix dialyzer
+Finding suitable PLTs
+Checking PLT...
+[:benchee, :compiler, :deep_merge, :elixir, :kernel, :logger, :ordered_collections, :statistex, :stdlib]
+PLT is up to date!
+No :ignore_warnings opt specified in mix.exs and default does not exist.
+
+Starting Dialyzer
+[
+  check_plt: false,
+  init_plt: ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/dialyxir_erlang-29.0.1_elixir-1.19.5_deps-dev.plt",
+  files: [~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Inspect.OrderedCollections.SortedMap.beam",
+   ...],
+  ...
+]
+Total errors: 0, Skipped: 0, Unnecessary Skips: 0
+done in 0m0.98s
+done (passed successfully)
+
+EXIT_STATUS=0
+
+=== final-docs.log ===
+
+After nested-checkout patch isolation fix
+$ mix docs
+Generating docs...
+View "html" docs at "doc/index.html"
+View "epub" docs at "doc/ordered_collections.epub"
+
+EXIT_STATUS=0
+
+=== final-shell-syntax.log ===
+
+After nested-checkout patch isolation fix
+$ bash -n bench/traversal_compare.sh
+
+EXIT_STATUS=0
+
+=== script-smoke.log ===
+{'BENCH_FILTER': '^map/enum_reduce/library$', 'BENCH_SIZES': '32', 'BENCH_TIME': '0.01', 'BENCH_WARMUP': '0.01', 'BENCH_MEMORY': '0.01'}
+$ bash bench/traversal_compare.sh /tmp/ordered-pr-comments/script-smoke
+Traversal comparison evidence: /tmp/ordered-pr-comments/script-smoke
+
+EXIT_STATUS=0
+
+=== script-smoke/baseline-verification.log ===
+lib/ordered_collections.ex: OK
+lib/ordered_collections/collectable/sorted_map.ex: OK
+lib/ordered_collections/collectable/sorted_set.ex: OK
+lib/ordered_collections/enumerable/sorted_map.ex: OK
+lib/ordered_collections/enumerable/sorted_set.ex: OK
+lib/ordered_collections/inspectable/sorted_map.ex: OK
+lib/ordered_collections/inspectable/sorted_set.ex: OK
+lib/ordered_collections/json_encoder/sorted_map.ex: OK
+lib/ordered_collections/json_encoder/sorted_set.ex: OK
+lib/ordered_collections/sorted_map.ex: OK
+lib/ordered_collections/sorted_set.ex: OK
+mix.exs: OK
+
+=== final-integrity.json ===
+{
+  "accepted_test_hashes_match": true,
+  "map_loop_unchanged": true,
+  "set_loop_unchanged": true,
+  "real_smoke_baseline_rows": 1,
+  "real_smoke_current_rows": 1
+}

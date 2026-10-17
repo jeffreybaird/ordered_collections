@@ -15,11 +15,13 @@ defmodule DialyzerHelper do
 
   ## Examples
 
-      iex> DialyzerHelper.dialyzer_warning_ignore(&OrderedCollections.to_map/1, [%{a: 1}])
-      ** (FunctionClauseError) ...
+      iex> map = OrderedCollections.new_map(%{a: 1})
+      iex> DialyzerHelper.dialyzer_warning_ignore(&OrderedCollections.map_get/2, [map, :a])
+      1
 
-      iex> DialyzerHelper.dialyzer_warning_ignore(&OrderedCollections.to_map/1, %{a: 1})
-      ** (FunctionClauseError) ...
+      iex> map = OrderedCollections.new_map(%{b: 2, a: 1})
+      iex> DialyzerHelper.dialyzer_warning_ignore(&OrderedCollections.map_to_map/1, map)
+      %{a: 1, b: 2}
   """
   def dialyzer_warning_ignore(function, args) when is_list(args) do
     apply(function, args)

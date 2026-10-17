@@ -1,0 +1,19 @@
+{
+  "test/ordered_collections/collectable/sorted_map_test.exs": "0a71caf3996b76d19e7e2d692d523912130dd163d4a02255c66bbfd43b733d24",
+  "test/ordered_collections/collectable/sorted_set_test.exs": "26972f2e47dd5e080f393322b69fb7b8f3895ff96f4737a6fcdaac01e3567b11",
+  "test/ordered_collections/collection_regression_test.exs": "012fa7cf5612fdfcbb49506ec333077228c296fe5674f4a41bf5b0b35f248333",
+  "test/ordered_collections/enumerable/contract_test.exs": "916ba06402c6272d16b863e3005b381be69a5ac34851f486d979627bc63d85b4",
+  "test/ordered_collections/enumerable/membership_test.exs": "d04588fd04dd0f26d53996cc11f30eaac64660ae086abbaba0492672dcd7810c",
+  "test/ordered_collections/enumerable/sorted_map_test.exs": "030c1ccd30ba6475287f140ef8d3d33e5f275ccc273362afecd76074d6b67cce",
+  "test/ordered_collections/enumerable/sorted_set_test.exs": "2781e697859baaf00c53cc3efbbe28614df07430c8554352589eacfece276f13",
+  "test/ordered_collections/inspectable/sorted_map_test.exs": "c13f391a8a6d81ee97813792cc4456bc140438206d8a266d24d24ee1606bb027",
+  "test/ordered_collections/inspectable/sorted_set_test.exs": "4a2f2777aff897e5c61df333abfdc43a9295728f76a0e06f7c25637b810e9a4f",
+  "test/ordered_collections/json/sorted_map_test.exs": "bb043e1a8135ac7ebf87910901faa1bf8f36d462970d94aa76f28c5af04e34ed",
+  "test/ordered_collections/json/sorted_set_test.exs": "d69e583213ff70ea5387b96a603a50b3d2ace8e5dcf25f1d291b568495318c89",
+  "test/ordered_collections/sorted_map_test.exs": "6c072652381d555c617fc6efba04897b1432591063d683283fc77a4960b19e50",
+  "test/ordered_collections/sorted_set_test.exs": "ca46101b63bb63d0d8f1bb7064cd1064747ae9bb81005a15b8e510d324d7a1e9",
+  "test/ordered_collections_test.exs": "fd97453a1b2bbe8478fe26974a4620b9516468f972d246d38710e297576f7ef7",
+  "test/support/dialyzer_helper.ex": "65884fba23169b8aa8be930f126392cbb2f14704e3f0f9360fd96ec7f4dbb832",
+  "test/support_test.exs": "0731913431b2ba3ebc0c46f1aa1e9babef2d63b24dd2d232527cea5d81c2b961",
+  "test/test_helper.exs": "b086ec47f0c6c7aaeb4cffca5ae5243dd05e0dc96ab761ced93325d5315f4b12"
+}
