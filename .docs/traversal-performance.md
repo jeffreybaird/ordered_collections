@@ -135,6 +135,14 @@ and [baseline-run log](traversal-benchmarks/map-repeat-baseline.log); substitute
 the output directory created by the comparison script for the recorded temporary
 directory when reproducing those commands.
 
+The script now checks the reconstructed source inventory and
+[SHA-256 manifest](traversal-baseline.sha256) before invoking Mix. If the pinned
+commit is absent, including in a shallow clone, it prints a fetch command and
+stops. `BASELINE_REVISION` may select an equivalent archive revision, but the
+resulting source must still match the same manifest; it is not an arbitrary
+alternative performance baseline. The resolved commit and verification log are
+saved with each new run.
+
 Measurements use an Apple M3, 16 GiB RAM, Elixir 1.19.5, Erlang/OTP 29.0.1
 (ERTS 17.0.1), eight schedulers, and Benchee with parallelism 1. Each job has
 0.3 seconds warmup, 1 second timing, and 0.2 seconds memory measurement at
@@ -178,3 +186,8 @@ the version-requirement update. Recorded benchmark hashes retain the original
 `mix.exs` requirement rather than rewriting historical evidence. Fresh validation
 of the upgraded requirement is recorded in
 [the upgrade validation log](elixir-upgrade-validation.log).
+
+The later [PR comment follow-up](pr-review-response.md) adds documentation,
+explicit numeric expectations, and baseline-script safeguards. Collection
+algorithms and timed workloads remain unchanged; the recorded source hashes
+refer to the original measured files, before those documentation edits.

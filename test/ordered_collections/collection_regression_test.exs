@@ -15,29 +15,28 @@ defmodule OrderedCollections.CollectionRegressionTest do
     assert Enum.count(set) == 3
   end
 
-  test "list construction preserves the numeric representatives selected by gb_sets.from_list" do
-    for input <- [[1, 1.0], [1.0, 1]] do
-      expected = input |> :gb_sets.from_list() |> :gb_sets.to_list()
-      assert input |> SortedSet.new() |> SortedSet.to_list() === expected
-    end
+  test "list construction retains the stored numeric representative for either input order" do
+    assert SortedSet.new([1, 1.0]) |> SortedSet.to_list() === [1]
+    assert SortedSet.new([1.0, 1]) |> SortedSet.to_list() === [1.0]
   end
 
-  test "enumerable construction preserves numeric representatives as incremental gb_sets.add does" do
-    for input <- [[1, 1.0], [1.0, 1]] do
-      expected = input |> Enum.reduce(:gb_sets.empty(), &:gb_sets.add/2) |> :gb_sets.to_list()
-      actual = input |> Stream.map(& &1) |> SortedSet.new() |> SortedSet.to_list()
-      assert actual === expected
-    end
+  test "enumerable construction retains the stored numeric representative for either input order" do
+    assert [1, 1.0] |> Stream.map(& &1) |> SortedSet.new() |> SortedSet.to_list() === [1]
+    assert [1.0, 1] |> Stream.map(& &1) |> SortedSet.new() |> SortedSet.to_list() === [1.0]
   end
 
-  test "set construction maintains Erlang uniqueness and ordering for mixed terms" do
+  test "set construction maintains strict representatives and uniqueness among mixed nested terms" do
     input = ["z", [3], {:id, 2}, :a, 1.0, 1, {:id, 2.0}, [3.0], :a]
 
-    for source <- [input, Stream.map(input, & &1)] do
+    for {items, expected} <- [
+          {input, [1.0, :a, {:id, 2}, [3], "z"]},
+          {Enum.reverse(input), [1, :a, {:id, 2.0}, [3.0], "z"]}
+        ],
+        source <- [items, Stream.map(items, & &1)] do
       set = SortedSet.new(source)
-      assert SortedSet.to_list(set) == [1, :a, {:id, 2}, [3], "z"]
+      assert SortedSet.to_list(set) === expected
       assert Enum.count(set) == 5
-      for item <- input, do: assert(SortedSet.member?(set, item))
+      for item <- items, do: assert(SortedSet.member?(set, item))
     end
   end
 

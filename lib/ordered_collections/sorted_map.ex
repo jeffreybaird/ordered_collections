@@ -35,7 +35,7 @@ defmodule OrderedCollections.SortedMap do
 
 
   - **JSON Encoding:**
-    SortedMap implements the JSON.Encoder protocol (using the native JSON support in Elixir 1.18 and later). This ensures that when you encode a SortedMap to JSON, the keys appear in sorted order.
+    SortedMap implements Elixir's native JSON.Encoder protocol. This ensures that when you encode a SortedMap to JSON, the keys appear in sorted order.
 
     **Example:**
 

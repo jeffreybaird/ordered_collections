@@ -13,6 +13,12 @@ defmodule OrderedCollections.SortedSet do
     SortedSet implements the Enumerable protocol. This means you can traverse the set using functions
     like `Enum.map/2`, `Enum.reduce/3`, and `Enum.slice/2`, all while preserving the sorted order of elements.
 
+    Full reductions use `:gb_sets.fold/3` to reduce iterator allocation. Early halt unwinds
+    that fold, and the first callback suspension performs an additional O(log n) tree seek
+    before switching to an iterator. Small-prefix operations such as `Enum.take/2` and
+    `Enum.find/2` can therefore have higher fixed overhead than iterator-only traversal.
+    Subsequent resumptions continue from the saved iterator.
+
     **Example:**
         iex> set = SortedSet.new([3, 1, 2])
         iex> Enum.map(set, &(&1 * 2))
@@ -21,6 +27,10 @@ defmodule OrderedCollections.SortedSet do
   - **Collectable:**
     SortedSet implements the Collectable protocol, allowing you to build a SortedSet from any enumerable
     using `Enum.into/2`.
+
+    When driving `Collectable.into/1` manually, treat its initial and intermediate
+    accumulators as opaque state and pass them only to the returned collector. They
+    are not SortedSets; the `:done` command returns the completed SortedSet.
 
     **Example:**
         iex> set = Enum.into([3, 1, 2], SortedSet.new())
@@ -38,7 +48,7 @@ defmodule OrderedCollections.SortedSet do
         ~s(#SortedSet<[1, 2, 3]>\\n)
 
   - **JSON Encoding:**
-    SortedSet implements the JSON.Encoder protocol (using Elixir 1.18's native JSON support) so that
+    SortedSet implements Elixir's native JSON.Encoder protocol so that
     when you encode a SortedSet to JSON, it is represented as an array with the elements in sorted order.
 
     **Example:**

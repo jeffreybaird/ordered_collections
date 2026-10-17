@@ -13,7 +13,7 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Fast lookups using `:gb_trees`
   - Range queries over keys.
   - Conversion to standard Elixir `Map` or list.
-  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
+  - Implements `Enum`, `Collectable`, `Inspect` and the native `JSON.Encoder` protocol
 
 - **SortedSet**
   - Maintain a set of unique elements in sorted order.
@@ -21,11 +21,12 @@ For detailed usage see our [docs](https://hexdocs.pm/ordered_collections/api-ref
   - Union, intersection, and difference operations.
   - Range queries over elements.
   - Conversion to a standard Elixir `MapSet` or list.
-  - Implements `Enum`, `Collectable`, `Inspect` and the new `JSON` protocol introduced in Elixir 1.18
+  - Implements `Enum`, `Collectable`, `Inspect` and the native `JSON.Encoder` protocol
 
 ## Installation
 
 This checkout requires Elixir 1.19.5 or later in the 1.x series.
+See the [changelog](CHANGELOG.md) for compatibility changes awaiting release.
 
 Add `ordered_collections` to your list of dependencies in `mix.exs`:
 

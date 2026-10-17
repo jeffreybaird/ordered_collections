@@ -1,9 +1,16 @@
 defimpl Collectable, for: OrderedCollections.SortedSet do
   alias OrderedCollections.SortedSet
 
+  @typedoc "Opaque collector state. Pass it only to the collector returned by `into/1`."
+  @opaque accumulator() :: :gb_sets.set()
+
   @doc """
   Implements the `into` function for the `Collectable` protocol.
   This function is used to collect elements into a SortedSet.
+
+  The initial and intermediate accumulators are opaque implementation state,
+  not SortedSets. Pass them unchanged to the returned collector; only `:done`
+  returns the completed SortedSet.
 
   The function handles all standard Collectable protocol signals:
   - `{:cont, element}`: Adds the element to the set
@@ -26,12 +33,12 @@ defimpl Collectable, for: OrderedCollections.SortedSet do
       [1, 2]
   """
   @spec into(OrderedCollections.SortedSet.t()) ::
-          {:gb_sets.set(),
-           (:gb_sets.set(),
+          {accumulator(),
+           (accumulator(),
             :done
             | :halt
             | {:cont, any()} ->
-              :gb_sets.set() | OrderedCollections.SortedSet.t() | :ok)}
+              accumulator() | OrderedCollections.SortedSet.t() | :ok)}
   def into(%SortedSet{set: set}) do
     collected_fun = fn
       set_acc, {:cont, elm} ->
