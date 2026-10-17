@@ -1,0 +1,561 @@
+$ mix test
+Compiling 12 files (.ex)
+Generated ordered_collections app
+Running ExUnit with seed: 689999, max_cases: 16
+
+...................
+
+  1) test map membership uses strict equality for nested numeric keys and values (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:42
+     Expected false or nil, got true
+     code: refute Enum.member?(map, {{:key, [1.0]}, %{value: [2]}})
+     arguments:
+
+         # 1
+         #SortedMap<%{nested: {:value, 3.0}, {:key, [1]} => %{value: [2]}}>
+
+         # 2
+         {{:key, [1.0]}, %{value: [2]}}
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:46: (test)
+
+
+
+  2) test map membership returns false for non-pairs (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:15
+     ** (FunctionClauseError) no function clause matching in Enumerable.OrderedCollections.SortedMap.member?/2
+
+     The following arguments were given to Enumerable.OrderedCollections.SortedMap.member?/2:
+
+         # 1
+         #SortedMap<%{a: 1}>
+
+         # 2
+         :a
+
+     Attempted function clauses (showing 1 out of 1):
+
+         def member?(%OrderedCollections.SortedMap{tree: tree}, -{key, _value}-)
+
+     code: for candidate <- [:a, nil, 1, {:a}, {:a, 1, :extra}, [:a, 1], %{a: 1}] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_map.ex:59: Enumerable.OrderedCollections.SortedMap.member?/2
+       (elixir 1.19.5) lib/enum.ex:1994: Enum.member?/2
+       test/ordered_collections/enumerable/membership_test.exs:19: anonymous fn/2 in OrderedCollections.Enumerable.MembershipTest."test map membership returns false for non-pairs"/1
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/membership_test.exs:18: (test)
+
+
+
+  3) test map membership requires the entire stored pair (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:6
+     Expected false or nil, got true
+     code: refute Enum.member?(map, {:a, :different})
+     arguments:
+
+         # 1
+         #SortedMap<%{a: 1, b: nil}>
+
+         # 2
+         {:a, :different}
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:10: (test)
+
+
+
+  4) test map membership uses strict equality for numeric keys (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:24
+     Expected false or nil, got true
+     code: refute Enum.member?(map, {1.0, :one})
+     arguments:
+
+         # 1
+         #SortedMap<%{1 => :one, 2.0 => :two}>
+
+         # 2
+         {1.0, :one}
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:30: (test)
+
+
+
+  5) test map membership uses strict equality for numeric values (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:34
+     Expected false or nil, got true
+     code: refute Enum.member?(map, {:a, 1.0})
+     arguments:
+
+         # 1
+         #SortedMap<%{a: 1, b: 2.0}>
+
+         # 2
+         {:a, 1.0}
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:38: (test)
+
+
+
+  6) test set collection membership retains Erlang equality while Enum membership is strict (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:51
+     Expected false or nil, got true
+     code: refute Enum.member?(set, 1.0)
+     arguments:
+
+         # 1
+         #SortedSet<[1, 2.0]>
+
+         # 2
+         1.0
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:57: (test)
+
+
+
+  7) test set Enum membership is strict inside compound terms (OrderedCollections.Enumerable.MembershipTest)
+     test/ordered_collections/enumerable/membership_test.exs:63
+     Expected false or nil, got true
+     code: refute Enum.member?(set, equivalent)
+     arguments:
+
+         # 1
+         #SortedSet<[id: 1]>
+
+         # 2
+         {:id, 1.0}
+
+     stacktrace:
+       test/ordered_collections/enumerable/membership_test.exs:72: anonymous fn/2 in OrderedCollections.Enumerable.MembershipTest."test set Enum membership is strict inside compound terms"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/membership_test.exs:64: (test)
+
+.................................................................................
+
+  8) test set construction maintains Erlang uniqueness and ordering for mixed terms (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:33
+     ** (ErlangError) Erlang error: {:key_exists, 1}
+     code: for source <- [input, Stream.map(input, & &1)] do
+     stacktrace:
+       (stdlib 8.0) gb_sets.erl:361: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:323: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:320: :gb_sets.insert/2
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (ordered_collections 0.3.3) lib/ordered_collections/sorted_set.ex:96: OrderedCollections.SortedSet.new/1
+       test/ordered_collections/collection_regression_test.exs:37: anonymous fn/1 in OrderedCollections.CollectionRegressionTest."test set construction maintains Erlang uniqueness and ordering for mixed terms"/1
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/collection_regression_test.exs:36: (test)
+
+.
+
+  9) test set construction accepts repeated elements from a non-list enumerable (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:12
+     ** (ErlangError) Erlang error: {:key_exists, 3}
+     code: set = [3, 1, 3, 2, 1] |> Stream.map(& &1) |> SortedSet.new()
+     stacktrace:
+       (stdlib 8.0) gb_sets.erl:361: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:320: :gb_sets.insert/2
+       (elixir 1.19.5) lib/enum.ex:4570: anonymous fn/3 in Enum.reduce/3
+       (elixir 1.19.5) lib/stream.ex:1761: anonymous fn/3 in Enumerable.Stream.reduce/3
+       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
+       (elixir 1.19.5) lib/stream.ex:1773: Enumerable.Stream.do_each/4
+       (elixir 1.19.5) lib/enum.ex:4570: Enum.reduce/3
+       (ordered_collections 0.3.3) lib/ordered_collections/sorted_set.ex:102: OrderedCollections.SortedSet.new/1
+       test/ordered_collections/collection_regression_test.exs:13: (test)
+
+..
+
+ 10) test set construction accepts repeated elements from a list (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:6
+     ** (ErlangError) Erlang error: {:key_exists, 3}
+     code: set = SortedSet.new([3, 1, 3, 2, 1])
+     stacktrace:
+       (stdlib 8.0) gb_sets.erl:361: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:320: :gb_sets.insert/2
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (ordered_collections 0.3.3) lib/ordered_collections/sorted_set.ex:96: OrderedCollections.SortedSet.new/1
+       test/ordered_collections/collection_regression_test.exs:7: (test)
+
+
+
+ 11) test update/4 invokes the callback on an existing nil value instead of using the default (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:67
+     Assertion with === failed
+     code:  assert SortedMap.get(updated, 1) === {:was, nil}
+     left:  :default
+     right: {:was, nil}
+     stacktrace:
+       test/ordered_collections/collection_regression_test.exs:81: (test)
+
+
+
+ 12) test list construction preserves the numeric representatives selected by gb_sets.from_list (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:18
+     ** (ErlangError) Erlang error: {:key_exists, 1.0}
+     code: for input <- [[1, 1.0], [1.0, 1]] do
+     stacktrace:
+       (stdlib 8.0) gb_sets.erl:361: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:320: :gb_sets.insert/2
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (ordered_collections 0.3.3) lib/ordered_collections/sorted_set.ex:96: OrderedCollections.SortedSet.new/1
+       test/ordered_collections/collection_regression_test.exs:21: anonymous fn/2 in OrderedCollections.CollectionRegressionTest."test list construction preserves the numeric representatives selected by gb_sets.from_list"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/collection_regression_test.exs:19: (test)
+
+
+
+ 13) test enumerable construction preserves numeric representatives as incremental gb_sets.add does (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:25
+     ** (ErlangError) Erlang error: {:key_exists, 1.0}
+     code: for input <- [[1, 1.0], [1.0, 1]] do
+     stacktrace:
+       (stdlib 8.0) gb_sets.erl:361: :gb_sets.insert_1/3
+       (stdlib 8.0) gb_sets.erl:320: :gb_sets.insert/2
+       (elixir 1.19.5) lib/enum.ex:4570: anonymous fn/3 in Enum.reduce/3
+       (elixir 1.19.5) lib/stream.ex:1761: anonymous fn/3 in Enumerable.Stream.reduce/3
+       (elixir 1.19.5) lib/enum.ex:5023: Enumerable.List.reduce/3
+       (elixir 1.19.5) lib/stream.ex:1773: Enumerable.Stream.do_each/4
+       (elixir 1.19.5) lib/enum.ex:4570: Enum.reduce/3
+       (ordered_collections 0.3.3) lib/ordered_collections/sorted_set.ex:102: OrderedCollections.SortedSet.new/1
+       test/ordered_collections/collection_regression_test.exs:28: anonymous fn/2 in OrderedCollections.CollectionRegressionTest."test enumerable construction preserves numeric representatives as incremental gb_sets.add does"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/collection_regression_test.exs:26: (test)
+
+..
+
+ 14) test update/3 invokes the callback on an existing nil value (OrderedCollections.CollectionRegressionTest)
+     test/ordered_collections/collection_regression_test.exs:52
+     Assertion with === failed
+     code:  assert SortedMap.to_map(updated) === %{a: {:was, nil}, untouched: 5}
+     left:  %{a: nil, untouched: 5}
+     right: %{a: {:was, nil}, untouched: 5}
+     stacktrace:
+       test/ordered_collections/collection_regression_test.exs:61: (test)
+
+.........
+
+ 15) test OrderedCollections.SortedSet protocol contract callback halt stops at the requested element (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:52
+     ** (CaseClauseError) no case clause matching:
+
+         {:halt, [1]}
+
+     code: assert Enumerable.reduce(collection, {:cont, []}, callback) === {:halted, [first]}
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (stdlib 8.0) gb_sets.erl:1558: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:60: (test)
+
+
+
+ 16) test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:110
+     ** (CaseClauseError) no case clause matching:
+
+         {:suspend, [1]}
+
+     code: for input <- [[], Enum.to_list(1..15)] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (stdlib 8.0) gb_sets.erl:1558: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       (elixir 1.19.5) lib/stream/reducers.ex:104: Stream.Reducers.do_zip_next/6
+       (elixir 1.19.5) lib/stream/reducers.ex:75: Stream.Reducers.do_zip_enum/4
+       (elixir 1.19.5) lib/enum.ex:4175: Enum.zip_reduce/3
+       (elixir 1.19.5) lib/enum.ex:4023: Enum.zip/1
+       test/ordered_collections/enumerable/contract_test.exs:115: anonymous fn/3 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends"/1
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/contract_test.exs:114: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:111: (test)
+
+.
+
+ 17) test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:121
+     ** (CaseClauseError) no case clause matching:
+
+         {:halt, {[1], 0}}
+
+     code: for input <- [[], Enum.to_list(1..15)] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (stdlib 8.0) gb_sets.erl:1558: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       (elixir 1.19.5) lib/enum.ex:3603: Enum.take/2
+       test/ordered_collections/enumerable/contract_test.exs:126: anonymous fn/3 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion"/1
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/contract_test.exs:125: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:122: (test)
+
+
+
+ 18) test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:10
+     Assertion with === failed
+     code:  assert Enumerable.reduce(collection, {:cont, []}, fn item, acc -> {:cont, [item | acc]} end) ===
+              {:done, Enum.reverse(expected)}
+     left:  {:cont, []}
+     right: {:done, []}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:14: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:11: (test)
+
+
+
+ 19) test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:65
+     match (=) failed
+     The following variables were pinned:
+       next_acc = [{2, {:value, 2}}, {1, {:value, 1}}]
+     code:  assert {:suspended, ^next_acc, resume} = result
+     left:  {:suspended, ^next_acc, resume}
+     right: {:cont, {:cont, [{1, {:value, 1}}]}}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:73: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:71: (test)
+
+
+
+ 20) test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:28
+     Assertion with === failed
+     code:  assert resume.({:cont, []}) === {:done, Enum.reverse(expected)}
+     left:  {:cont, []}
+     right: {:done, []}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:45: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:29: (test)
+
+
+
+ 21) test OrderedCollections.SortedSet protocol contract repeated callback suspension retains every pending element in order (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:65
+     ** (CaseClauseError) no case clause matching:
+
+         {:suspend, [1]}
+
+     code: result = Enumerable.reduce(collection, {:cont, []}, callback)
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (stdlib 8.0) gb_sets.erl:1558: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:68: (test)
+
+
+
+ 22) test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:20
+     ** (FunctionClauseError) no function clause matching in Enumerable.OrderedCollections.SortedMap.reduce/3
+
+     The following arguments were given to Enumerable.OrderedCollections.SortedMap.reduce/3:
+
+         # 1
+         #SortedMap<%{}>
+
+         # 2
+         {:halt, :stopped}
+
+         # 3
+         #Function<44.16273651/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection"/1>
+
+     Attempted function clauses (showing 1 out of 1):
+
+         def reduce(%OrderedCollections.SortedMap{tree: {_, root_node}}, -{:cont, acc}-, fun)
+
+     code: for input <- [[], [1, 2, 3]] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_map.ex:23: Enumerable.OrderedCollections.SortedMap.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:24: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:21: (test)
+
+
+
+ 23) test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:141
+     Assertion with === failed
+     code:  assert Enum.slice(collection, range) === Enum.slice(expected, range)
+     left:  [1, 2, 3, 4, 5, 6]
+     right: [1, 3, 5, 7, 9, 11]
+     stacktrace:
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/contract_test.exs:145: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:142: (test)
+
+..
+
+ 24) test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:10
+     Assertion with === failed
+     code:  assert Enumerable.reduce(collection, {:cont, []}, fn item, acc -> {:cont, [item | acc]} end) ===
+              {:done, Enum.reverse(expected)}
+     left:  {:cont, []}
+     right: {:done, []}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:14: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:11: (test)
+
+
+
+ 25) test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:110
+     ** (FunctionClauseError) no function clause matching in Enumerable.OrderedCollections.SortedMap.reduce/3
+
+     The following arguments were given to Enumerable.OrderedCollections.SortedMap.reduce/3:
+
+         # 1
+         #SortedMap<%{}>
+
+         # 2
+         {:halt, []}
+
+         # 3
+         #Function<6.70672787/2 in Stream.Reducers.zip_enum/4>
+
+     Attempted function clauses (showing 1 out of 1):
+
+         def reduce(%OrderedCollections.SortedMap{tree: {_, root_node}}, -{:cont, acc}-, fun)
+
+     code: for input <- [[], Enum.to_list(1..15)] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_map.ex:23: Enumerable.OrderedCollections.SortedMap.reduce/3
+       (stdlib 8.0) lists.erl:2641: :lists.foreach_1/2
+       (elixir 1.19.5) lib/stream/reducers.ex:78: Stream.Reducers.do_zip_enum/4
+       (elixir 1.19.5) lib/enum.ex:4175: Enum.zip_reduce/3
+       (elixir 1.19.5) lib/enum.ex:4023: Enum.zip/1
+       test/ordered_collections/enumerable/contract_test.exs:116: anonymous fn/3 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends"/1
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/contract_test.exs:114: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:111: (test)
+
+
+
+ 26) test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:28
+     ** (FunctionClauseError) no function clause matching in Enumerable.OrderedCollections.SortedMap.reduce/3
+
+     The following arguments were given to Enumerable.OrderedCollections.SortedMap.reduce/3:
+
+         # 1
+         #SortedMap<%{}>
+
+         # 2
+         {:suspend, []}
+
+         # 3
+         #Function<41.16273651/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion"/1>
+
+     Attempted function clauses (showing 1 out of 1):
+
+         def reduce(%OrderedCollections.SortedMap{tree: {_, root_node}}, -{:cont, acc}-, fun)
+
+     code: for input <- [[], [1, 2, 3]] do
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_map.ex:23: Enumerable.OrderedCollections.SortedMap.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:38: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:29: (test)
+
+.
+
+ 27) test OrderedCollections.SortedSet protocol contract a continuation suspended after the last element still honors control signals (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:101
+     ** (CaseClauseError) no case clause matching:
+
+         {:suspend, 1}
+
+     code: assert {:suspended, ^only, resume} = Enumerable.reduce(collection, {:cont, nil}, callback)
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:104: (test)
+
+
+
+ 28) test OrderedCollections.SortedMap protocol contract callback continuation accepts halt and suspension without consuming an element (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:80
+     match (=) failed
+     code:  assert {:suspended, [:replacement], resume_again} = resume.({:suspend, [:replacement]})
+     left:  {:suspended, [:replacement], resume_again}
+     right: {:cont, {:suspend, [:replacement]}}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:92: (test)
+
+
+
+ 29) test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:141
+     Assertion with === failed
+     code:  assert Enum.slice(collection, range) === Enum.slice(expected, range)
+     left:  [
+              {1, {:value, 1}},
+              {2, {:value, 2}},
+              {3, {:value, 3}},
+              {4, {:value, 4}},
+              {5, {:value, 5}},
+              {6, {:value, 6}}
+            ]
+     right: [
+              {1, {:value, 1}},
+              {3, {:value, 3}},
+              {5, {:value, 5}},
+              {7, {:value, 7}},
+              {9, {:value, 9}},
+              {11, {:value, 11}}
+            ]
+     stacktrace:
+       (elixir 1.19.5) lib/enum.ex:1688: Enum."-map/2-lists^map/1-1-"/2
+       test/ordered_collections/enumerable/contract_test.exs:145: anonymous fn/2 in OrderedCollections.Enumerable.ContractTest."test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds"/1
+       (elixir 1.19.5) lib/enum.ex:2520: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/ordered_collections/enumerable/contract_test.exs:142: (test)
+
+
+
+ 30) test OrderedCollections.SortedSet protocol contract callback continuation accepts halt and suspension without consuming an element (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:80
+     ** (CaseClauseError) no case clause matching:
+
+         {:suspend, [1]}
+
+     code: Enumerable.reduce(collection, {:cont, []}, callback)
+     stacktrace:
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:27: anonymous fn/3 in Enumerable.OrderedCollections.SortedSet.reduce/3
+       (stdlib 8.0) gb_sets.erl:1559: :gb_sets.fold_1/3
+       (stdlib 8.0) gb_sets.erl:1558: :gb_sets.fold_1/3
+       (ordered_collections 0.3.3) lib/ordered_collections/enumerable/sorted_set.ex:25: Enumerable.OrderedCollections.SortedSet.reduce/3
+       test/ordered_collections/enumerable/contract_test.exs:89: (test)
+
+
+
+ 31) test OrderedCollections.SortedMap protocol contract a continuation suspended after the last element still honors control signals (OrderedCollections.Enumerable.ContractTest)
+     test/ordered_collections/enumerable/contract_test.exs:101
+     Assertion with == failed
+     code:  assert resume.({:halt, :stopped}) == {:halted, :stopped}
+     left:  {:cont, {:halt, :stopped}}
+     right: {:halted, :stopped}
+     stacktrace:
+       test/ordered_collections/enumerable/contract_test.exs:105: (test)
+
+..................................................................................................................
+Finished in 0.1 seconds (0.1s async, 0.01s sync)
+108 doctests, 155 tests, 31 failures
+
+EXIT_STATUS=2

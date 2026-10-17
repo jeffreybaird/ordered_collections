@@ -1,0 +1,20 @@
+{
+  "archive_revision": "61ca0f5c50dbdbc8db78b09c9f0dc32006fb9b49",
+  "patch_apply_exit": 0,
+  "patch_apply_output": "",
+  "baseline_hash_matches": {
+    "lib/ordered_collections/collectable/sorted_map.ex": true,
+    "lib/ordered_collections/collectable/sorted_set.ex": true,
+    "lib/ordered_collections/enumerable/sorted_map.ex": true,
+    "lib/ordered_collections/enumerable/sorted_set.ex": true,
+    "lib/ordered_collections/inspectable/sorted_map.ex": true,
+    "lib/ordered_collections/inspectable/sorted_set.ex": true,
+    "lib/ordered_collections/json_encoder/sorted_map.ex": true,
+    "lib/ordered_collections/json_encoder/sorted_set.ex": true,
+    "lib/ordered_collections/sorted_map.ex": true,
+    "lib/ordered_collections/sorted_set.ex": true,
+    "lib/ordered_collections.ex": true,
+    "mix.exs": true
+  },
+  "all_match": true
+}

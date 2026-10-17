@@ -1,0 +1,9 @@
+CWD=/Users/jeffreybaird/src/ordered_collections
+{'BENCH_FILTER': '^map/enum_reduce/(library|raw)$', 'BENCH_SIZES': '1000,20000,100000', 'BENCH_TIME': '2.0', 'BENCH_WARMUP': '0.5', 'BENCH_MEMORY': '0.2', 'BENCH_LABEL': 'map-repeat-current', 'BENCH_OUTPUT': '/tmp/ordered-enumeration-review/map-repeat-current.json'}
+$ mix run /tmp/ordered-enumeration-review/final/traversal.exs
+Traversal candidates: 1000 elements, 2 jobs
+Traversal candidates: 20000 elements, 2 jobs
+Traversal candidates: 100000 elements, 2 jobs
+Saved /tmp/ordered-enumeration-review/map-repeat-current.json
+
+EXIT_STATUS=0

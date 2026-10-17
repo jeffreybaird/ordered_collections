@@ -1,0 +1,16 @@
+$ elixir --version
+Erlang/OTP 29 [erts-17.0.1] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit] [dtrace]
+
+Elixir 1.19.5 (compiled with Erlang/OTP 28)
+EXIT_STATUS=0
+$ uname -a
+Darwin Jeffreys-MBP 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:29 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8122 arm64
+EXIT_STATUS=0
+$ sysctl -n machdep.cpu.brand_string hw.memsize
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+EXIT_STATUS=1
+
+$ sysctl -n machdep.cpu.brand_string hw.memsize [native escalation allowed]
+Apple M3
+17179869184
+EXIT_STATUS=0

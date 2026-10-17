@@ -1,0 +1,8 @@
+$ mix format --check-formatted
+
+EXIT_STATUS=0
+
+After private reduce_set opaque inference repair
+$ mix format --check-formatted
+
+EXIT_STATUS=0

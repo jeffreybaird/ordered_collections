@@ -1,0 +1,240 @@
+$ mix format --check-formatted
+
+EXIT_STATUS=0
+
+
+$ mix compile --warnings-as-errors
+Compiling 2 files (.ex)
+Generated ordered_collections app
+
+EXIT_STATUS=0
+
+
+$ mix test
+Compiling 2 files (.ex)
+Generated ordered_collections app
+Running ExUnit with seed: 622373, max_cases: 16
+
+.........................................................................................................................................................................................................................................................................
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+110 doctests, 155 tests, 0 failures
+
+EXIT_STATUS=0
+
+
+$ mix test test/ordered_collections/enumerable test/ordered_collections/collection_regression_test.exs test/ordered_collections/collectable test/dialyzer_helper_test.exs --trace
+Running ExUnit with seed: 130534, max_cases: 1
+
+
+OrderedCollections.Collectable.SortedMapTest [test/ordered_collections/collectable/sorted_map_test.exs]
+  * test into/1 raises error when collecting non-key-value pairs [L#53]
+  * test into/1 raises error when collecting non-key-value pairs (6.5ms) [L#53]
+  * test into/1 handles empty collection [L#77]
+  * test into/1 handles empty collection (0.00ms) [L#77]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (4) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (4) (0.00ms) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (2) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (2) (0.5ms) [L#4]
+  * test into/1 raises error when collecting invalid key-value pairs [L#65]
+  * test into/1 raises error when collecting invalid key-value pairs (0.01ms) [L#65]
+  * test into/1 collects with consecutive cont signals and finishes with done [L#19]
+  * test into/1 collects with consecutive cont signals and finishes with done (0.00ms) [L#19]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (1) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (1) (0.00ms) [L#4]
+  * test into/1 collects elements into a SortedMap with a custom initial value [L#13]
+  * test into/1 collects elements into a SortedMap with a custom initial value (0.00ms) [L#13]
+  * test into/1 collects elements into a SortedMap [L#7]
+  * test into/1 collects elements into a SortedMap (0.00ms) [L#7]
+  * test into/1 handles halt in collection [L#36]
+  * test into/1 handles halt in collection (0.00ms) [L#36]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (3) [L#4]
+  * doctest Collectable.OrderedCollections.SortedMap.into/1 (3) (0.00ms) [L#4]
+
+OrderedCollections.Collectable.SortedSetTest [test/ordered_collections/collectable/sorted_set_test.exs]
+  * test into/1 maintains uniqueness during collection [L#56]
+  * test into/1 maintains uniqueness during collection (0.00ms) [L#56]
+  * test into/1 collects elements into a SortedSet [L#7]
+  * test into/1 collects elements into a SortedSet (0.00ms) [L#7]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (2) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (2) (0.00ms) [L#4]
+  * test into/1 handles halt in collection [L#33]
+  * test into/1 handles halt in collection (0.00ms) [L#33]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (1) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (1) (0.00ms) [L#4]
+  * test into/1 collects with consecutive cont signals and finishes with done [L#17]
+  * test into/1 collects with consecutive cont signals and finishes with done (0.00ms) [L#17]
+  * test into/1 collects elements into a SortedSet with a custom initial value [L#12]
+  * test into/1 collects elements into a SortedSet with a custom initial value (0.00ms) [L#12]
+  * test into/1 handles empty collection [L#50]
+  * test into/1 handles empty collection (0.00ms) [L#50]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (3) [L#4]
+  * doctest Collectable.OrderedCollections.SortedSet.into/1 (3) (0.00ms) [L#4]
+
+OrderedCollections.Enumerable.SortedMapTest [test/ordered_collections/enumerable/sorted_map_test.exs]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange even if key order is different than val order [L#33]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange even if key order is different than val order (0.00ms) [L#33]
+  * doctest Enumerable.OrderedCollections.SortedMap.slice/1 (4) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.slice/1 (4) (0.00ms) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.count/1 (2) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.count/1 (2) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedMap Enum.reduce/3 iterates over elements [L#18]
+  * test Enumerable implementation for SortedMap Enum.reduce/3 iterates over elements (0.00ms) [L#18]
+  * doctest Enumerable.OrderedCollections.SortedMap.reduce/3 (1) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.reduce/3 (1) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedMap Enum.member?/2 checks for key presence [L#12]
+  * test Enumerable implementation for SortedMap Enum.member?/2 checks for key presence (0.00ms) [L#12]
+  * test Enumerable implementation for SortedMap Enum.count/1 returns the number of elements [L#7]
+  * test Enumerable implementation for SortedMap Enum.count/1 returns the number of elements (0.00ms) [L#7]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange [L#26]
+  * test Enumerable implementation for SortedMap Enum.slice/2 retrieves a subrange (0.00ms) [L#26]
+  * doctest Enumerable.OrderedCollections.SortedMap.member?/2 (3) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedMap.member?/2 (3) (0.00ms) [L#4]
+
+OrderedCollections.Enumerable.SortedSetTest [test/ordered_collections/enumerable/sorted_set_test.exs]
+  * test Enumerable implementation for SortedSet Enum.count/1 returns the number of elements [L#7]
+  * test Enumerable implementation for SortedSet Enum.count/1 returns the number of elements (0.00ms) [L#7]
+  * doctest Enumerable.OrderedCollections.SortedSet.member?/2 (2) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.member?/2 (2) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedSet Enum.reduce/3 iterates over elements [L#23]
+  * test Enumerable implementation for SortedSet Enum.reduce/3 iterates over elements (0.00ms) [L#23]
+  * doctest Enumerable.OrderedCollections.SortedSet.reduce/3 (1) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.reduce/3 (1) (0.00ms) [L#4]
+  * test Enumerable implementation for SortedSet Enum.member?/2 checks for key presence [L#17]
+  * test Enumerable implementation for SortedSet Enum.member?/2 checks for key presence (0.00ms) [L#17]
+  * test Enumerable implementation for SortedSet Handles and empty set [L#12]
+  * test Enumerable implementation for SortedSet Handles and empty set (0.00ms) [L#12]
+  * test Enumerable implementation for SortedSet reduces a set of sets [L#31]
+  * test Enumerable implementation for SortedSet reduces a set of sets (0.00ms) [L#31]
+  * doctest Enumerable.OrderedCollections.SortedSet.slice/1 (3) [L#4]
+  * doctest Enumerable.OrderedCollections.SortedSet.slice/1 (3) (0.00ms) [L#4]
+
+OrderedCollections.CollectionRegressionTest [test/ordered_collections/collection_regression_test.exs]
+  * test missing map updates insert their documented defaults without invoking the callback [L#87]
+  * test missing map updates insert their documented defaults without invoking the callback (0.00ms) [L#87]
+  * test set collection preserves initial representatives and deduplicates incoming values [L#153]
+  * test set collection preserves initial representatives and deduplicates incoming values (0.00ms) [L#153]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds [L#111]
+  * test map ranges are inclusive sorted lists across boundaries and mixed term bounds (0.00ms) [L#111]
+  * test map collection preserves initial entries and the last value for equivalent keys wins [L#161]
+  * test map collection preserves initial entries and the last value for equivalent keys wins (0.00ms) [L#161]
+  * test enumerable construction preserves numeric representatives as incremental gb_sets.add does [L#25]
+  * test enumerable construction preserves numeric representatives as incremental gb_sets.add does (0.00ms) [L#25]
+  * test set construction accepts repeated elements from a non-list enumerable [L#12]
+  * test set construction accepts repeated elements from a non-list enumerable (0.00ms) [L#12]
+  * test map conversions retain keys, nil values, and values in key order [L#100]
+  * test map conversions retain keys, nil values, and values in key order (0.00ms) [L#100]
+  * test update/3 invokes the callback on an existing nil value [L#52]
+  * test update/3 invokes the callback on an existing nil value (0.00ms) [L#52]
+  * test set construction accepts repeated elements from a list [L#6]
+  * test set construction accepts repeated elements from a list (0.00ms) [L#6]
+  * test set insertion preserves stored representatives on numeric hits and adds misses [L#44]
+  * test set insertion preserves stored representatives on numeric hits and adds misses (0.00ms) [L#44]
+  * test set construction maintains Erlang uniqueness and ordering for mixed terms [L#33]
+  * test set construction maintains Erlang uniqueness and ordering for mixed terms (0.00ms) [L#33]
+  * test update/4 invokes the callback on an existing nil value instead of using the default [L#67]
+  * test update/4 invokes the callback on an existing nil value instead of using the default (0.00ms) [L#67]
+  * test set ranges return sets and retain stored representatives at inclusive bounds [L#132]
+  * test set ranges return sets and retain stored representatives at inclusive bounds (0.00ms) [L#132]
+  * test list construction preserves the numeric representatives selected by gb_sets.from_list [L#18]
+  * test list construction preserves the numeric representatives selected by gb_sets.from_list (0.00ms) [L#18]
+
+OrderedCollections.Enumerable.MembershipTest [test/ordered_collections/enumerable/membership_test.exs]
+  * test map membership uses strict equality for numeric values [L#34]
+  * test map membership uses strict equality for numeric values (0.00ms) [L#34]
+  * test map membership returns false for non-pairs [L#15]
+  * test map membership returns false for non-pairs (0.00ms) [L#15]
+  * test set Enum membership is strict inside compound terms [L#63]
+  * test set Enum membership is strict inside compound terms (0.00ms) [L#63]
+  * test map membership requires the entire stored pair [L#6]
+  * test map membership requires the entire stored pair (0.00ms) [L#6]
+  * test set collection membership retains Erlang equality while Enum membership is strict [L#51]
+  * test set collection membership retains Erlang equality while Enum membership is strict (0.00ms) [L#51]
+  * test map membership uses strict equality for nested numeric keys and values [L#42]
+  * test map membership uses strict equality for nested numeric keys and values (0.00ms) [L#42]
+  * test map membership uses strict equality for numeric keys [L#24]
+  * test map membership uses strict equality for numeric keys (0.00ms) [L#24]
+
+OrderedCollections.Enumerable.ContractTest [test/ordered_collections/enumerable/contract_test.exs]
+  * test OrderedCollections.SortedSet protocol contract callback continuation accepts halt and suspension without consuming an element [L#80]
+  * test OrderedCollections.SortedSet protocol contract callback continuation accepts halt and suspension without consuming an element (0.00ms) [L#80]
+  * test OrderedCollections.SortedMap protocol contract Enum.take supports early termination and exhaustion [L#121]
+  * test OrderedCollections.SortedMap protocol contract Enum.take supports early termination and exhaustion (0.01ms) [L#121]
+  * test OrderedCollections.SortedSet protocol contract initial halt skips callbacks, including on an empty collection [L#20]
+  * test OrderedCollections.SortedSet protocol contract initial halt skips callbacks, including on an empty collection (0.00ms) [L#20]
+  * test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds [L#141]
+  * test OrderedCollections.SortedMap protocol contract stepped slices match ordered lists including negative bounds (0.01ms) [L#141]
+  * test OrderedCollections.SortedSet protocol contract a continuation suspended after the last element still honors control signals [L#101]
+  * test OrderedCollections.SortedSet protocol contract a continuation suspended after the last element still honors control signals (0.00ms) [L#101]
+  * test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion [L#28]
+  * test OrderedCollections.SortedSet protocol contract initial suspension can suspend again, halt, or resume to exhaustion (0.00ms) [L#28]
+  * test OrderedCollections.SortedMap protocol contract callback halt stops at the requested element [L#52]
+  * test OrderedCollections.SortedMap protocol contract callback halt stops at the requested element (0.00ms) [L#52]
+  * test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection [L#20]
+  * test OrderedCollections.SortedMap protocol contract initial halt skips callbacks, including on an empty collection (0.00ms) [L#20]
+  * test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion [L#121]
+  * test OrderedCollections.SortedSet protocol contract Enum.take supports early termination and exhaustion (0.00ms) [L#121]
+  * test OrderedCollections.SortedSet protocol contract repeated callback suspension retains every pending element in order [L#65]
+  * test OrderedCollections.SortedSet protocol contract repeated callback suspension retains every pending element in order (0.00ms) [L#65]
+  * test OrderedCollections.SortedMap protocol contract contiguous slices match ordered lists at negative and out-of-range indices [L#131]
+  * test OrderedCollections.SortedMap protocol contract contiguous slices match ordered lists at negative and out-of-range indices (0.01ms) [L#131]
+  * test OrderedCollections.SortedMap protocol contract a continuation suspended after the last element still honors control signals [L#101]
+  * test OrderedCollections.SortedMap protocol contract a continuation suspended after the last element still honors control signals (0.00ms) [L#101]
+  * test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs [L#10]
+  * test OrderedCollections.SortedMap protocol contract exhaustion returns done for empty and populated inputs (0.00ms) [L#10]
+  * test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends [L#110]
+  * test OrderedCollections.SortedSet protocol contract Enum.zip resumes collections and stops when either input ends (0.01ms) [L#110]
+  * test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds [L#141]
+  * test OrderedCollections.SortedSet protocol contract stepped slices match ordered lists including negative bounds (0.00ms) [L#141]
+  * test OrderedCollections.SortedSet protocol contract callback halt stops at the requested element [L#52]
+  * test OrderedCollections.SortedSet protocol contract callback halt stops at the requested element (0.00ms) [L#52]
+  * test OrderedCollections.SortedMap protocol contract callback continuation accepts halt and suspension without consuming an element [L#80]
+  * test OrderedCollections.SortedMap protocol contract callback continuation accepts halt and suspension without consuming an element (0.00ms) [L#80]
+  * test OrderedCollections.SortedSet protocol contract contiguous slices match ordered lists at negative and out-of-range indices [L#131]
+  * test OrderedCollections.SortedSet protocol contract contiguous slices match ordered lists at negative and out-of-range indices (0.00ms) [L#131]
+  * test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order [L#65]
+  * test OrderedCollections.SortedMap protocol contract repeated callback suspension retains every pending element in order (0.00ms) [L#65]
+  * test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends [L#110]
+  * test OrderedCollections.SortedMap protocol contract Enum.zip resumes collections and stops when either input ends (0.02ms) [L#110]
+  * test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs [L#10]
+  * test OrderedCollections.SortedSet protocol contract exhaustion returns done for empty and populated inputs (0.00ms) [L#10]
+  * test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion [L#28]
+  * test OrderedCollections.SortedMap protocol contract initial suspension can suspend again, halt, or resume to exhaustion (0.00ms) [L#28]
+
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+14 doctests, 66 tests, 0 failures
+
+EXIT_STATUS=0
+
+
+$ mix dialyzer
+Finding suitable PLTs
+Checking PLT...
+[:benchee, :compiler, :deep_merge, :elixir, :kernel, :logger, :ordered_collections, :statistex, :stdlib]
+PLT is up to date!
+No :ignore_warnings opt specified in mix.exs and default does not exist.
+
+Starting Dialyzer
+[
+  check_plt: false,
+  init_plt: ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/dialyxir_erlang-29.0.1_elixir-1.19.5_deps-dev.plt",
+  files: [~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Inspect.OrderedCollections.SortedMap.beam",
+   ...],
+  ...
+]
+Total errors: 0, Skipped: 0, Unnecessary Skips: 0
+done in 0m1.0s
+done (passed successfully)
+
+EXIT_STATUS=0
+
+
+$ mix docs
+Generating docs...
+View "html" docs at "doc/index.html"
+View "epub" docs at "doc/ordered_collections.epub"
+
+EXIT_STATUS=0

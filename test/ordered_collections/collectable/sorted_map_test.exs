@@ -16,17 +16,14 @@ defmodule OrderedCollections.Collectable.SortedMapTest do
       assert sorted_map == expected
     end
 
-    test "handles suspend in collection" do
+    test "collects with consecutive cont signals and finishes with done" do
       {initial, collector} = Collectable.into(SortedMap.new())
 
       # Start collection with first element
       acc = collector.(initial, {:cont, {:a, 1}})
 
-      # Suspend collection
-      suspended_acc = collector.(acc, {:suspend, []})
-
-      # Resume collection with more elements
-      final_acc = collector.(suspended_acc, {:cont, {:b, 2}})
+      # Continue collection with more elements
+      final_acc = collector.(acc, {:cont, {:b, 2}})
       final_acc = collector.(final_acc, {:cont, {:c, 3}})
 
       # Complete collection

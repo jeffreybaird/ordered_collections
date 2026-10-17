@@ -1,9 +1,8 @@
 defmodule OrderedCollections.SortedMap do
   alias __MODULE__, as: SortedMap
-  alias OrderedCollections.SortedSet
 
   @moduledoc """
-  A sorted key-value store implemented using Erlang's `:gb_trees` (Red-Black Trees).
+  A sorted key-value store implemented using Erlang's `:gb_trees`.
 
   This module stores items in sorted order by their keys and offers a rich set of features that allow it to integrate seamlessly with Elixir’s core protocols:
 
@@ -66,7 +65,7 @@ defmodule OrderedCollections.SortedMap do
       %{}
   """
   @spec new() :: SortedMap.t()
-  def new(), do: %__MODULE__{}
+  def new(), do: %__MODULE__{tree: :gb_trees.empty()}
 
   @doc """
   Creates a new sorted map from a standard map.
@@ -109,8 +108,8 @@ defmodule OrderedCollections.SortedMap do
       [1, 2, 3]
   """
   @spec values(SortedMap.t()) :: list()
-  def values(sorted_map = %__MODULE__{}) do
-    sorted_map |> Enum.map(fn {_, v} -> v end)
+  def values(%__MODULE__{tree: tree}) do
+    :gb_trees.values(tree)
   end
 
   @doc """
@@ -139,18 +138,13 @@ defmodule OrderedCollections.SortedMap do
       2
   """
   @spec put(SortedMap.t(), any(), any()) :: SortedMap.t()
-  def put(%SortedMap{tree: tree} = map, key, value) do
-    try do
-      %SortedMap{tree: :gb_trees.insert(key, value, tree)}
-    rescue
-      _ ->
-        %SortedMap{map | tree: :gb_trees.enter(key, value, tree)}
-    end
+  def put(%SortedMap{tree: tree}, key, value) do
+    %SortedMap{tree: :gb_trees.enter(key, value, tree)}
   end
 
   @doc """
   Updates a key with a function. If the key doesn’t exist,
-  it is set to `nil`.
+  it is set to `nil`. An existing `nil` value is passed to the function.
 
   ## Examples
 
@@ -161,22 +155,19 @@ defmodule OrderedCollections.SortedMap do
 
       iex> SortedMap.new(%{a: 1}) |> SortedMap.update(:b, &(&1 + 1)) |> SortedMap.get(:b)
       nil
+
+      iex> SortedMap.new(%{a: nil}) |> SortedMap.update(:a, fn nil -> :updated end) |> SortedMap.get(:a)
+      :updated
   """
 
   @spec update(SortedMap.t(), any(), (any() -> any())) :: t()
   def update(%__MODULE__{} = map, key, fun) do
-    # Get the current value for the key
-    case get(map, key) do
-      # If the key doesn't exist, set it to nil
-      nil -> put(map, key, nil)
-      # Otherwise, update the value with the function
-      val -> put(map, key, fun.(val))
-    end
+    update(map, key, fun, nil)
   end
 
   @doc """
   Updates a key with a function. If the key doesn’t exist,
-  it sets it to `default`.
+  it sets it to `default`. An existing `nil` value is passed to the function.
 
   ## Examples
 
@@ -189,10 +180,10 @@ defmodule OrderedCollections.SortedMap do
       10
   """
   @spec update(SortedMap.t(), any(), (any() -> any()), any()) :: t()
-  def update(%__MODULE__{} = map, key, fun, default) do
-    case get(map, key) do
-      nil -> put(map, key, default)
-      val -> put(map, key, fun.(val))
+  def update(%__MODULE__{tree: tree} = map, key, fun, default) do
+    case :gb_trees.lookup(key, tree) do
+      :none -> put(map, key, default)
+      {:value, val} -> put(map, key, fun.(val))
     end
   end
 
@@ -346,10 +337,8 @@ defmodule OrderedCollections.SortedMap do
       %{a: 2, b: 1}
   """
   @spec to_map(SortedMap.t()) :: map()
-  def to_map(sorted_map) do
-    SortedMap.to_list(sorted_map)
-    |> SortedSet.new()
-    |> Enum.into(Map.new())
+  def to_map(%SortedMap{tree: tree}) do
+    Map.new(:gb_trees.to_list(tree))
   end
 
   @doc """
@@ -364,12 +353,23 @@ defmodule OrderedCollections.SortedMap do
   """
   @spec range(SortedMap.t(), any(), any()) :: [{any(), any()}]
   def range(%SortedMap{tree: tree}, min, max) do
-    tree
-    |> :gb_trees.to_list()
-    |> Enum.reduce([], fn {key, value}, acc ->
-      if key >= min and key <= max, do: [{key, value} | acc], else: acc
-    end)
-    |> Enum.reverse()
+    cond do
+      min > max or :gb_trees.is_empty(tree) ->
+        []
+
+      min <= elem(:gb_trees.smallest(tree), 0) and max >= elem(:gb_trees.largest(tree), 0) ->
+        :gb_trees.to_list(tree)
+
+      true ->
+        collect_range(:gb_trees.iterator_from(min, tree), max, [])
+    end
+  end
+
+  defp collect_range(iterator, max, acc) do
+    case :gb_trees.next(iterator) do
+      {key, value, next} when key <= max -> collect_range(next, max, [{key, value} | acc])
+      _ -> Enum.reverse(acc)
+    end
   end
 
   @doc """

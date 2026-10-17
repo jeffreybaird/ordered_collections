@@ -1,0 +1,22 @@
+$ mix test
+Compiling 3 files (.ex)
+Generated ordered_collections app
+Running ExUnit with seed: 834671, max_cases: 16
+
+.......................................................................................................................................................................................................................................................................................
+Finished in 0.1 seconds (0.1s async, 0.01s sync)
+110 doctests, 169 tests, 0 failures
+
+EXIT_STATUS=0
+
+After private reduce_set opaque inference repair
+$ mix test
+Compiling 1 file (.ex)
+Generated ordered_collections app
+Running ExUnit with seed: 37358, max_cases: 16
+
+.......................................................................................................................................................................................................................................................................................
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+110 doctests, 169 tests, 0 failures
+
+EXIT_STATUS=0

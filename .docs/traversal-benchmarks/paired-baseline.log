@@ -1,0 +1,496 @@
+==> earmark_parser
+Compiling 3 files (.erl)
+Compiling 47 files (.ex)
+Generated earmark_parser app
+==> statistex
+Compiling 3 files (.ex)
+Generated statistex app
+==> erlex
+Compiling 2 files (.erl)
+Compiling 1 file (.ex)
+Generated erlex app
+==> deep_merge
+Compiling 2 files (.ex)
+Generated deep_merge app
+==> benchee
+Compiling 46 files (.ex)
+    warning: a struct for Benchee.Scenario is expected on struct update:
+
+        %Benchee.Scenario{scenario | name: Benchee.Scenario.display_name(scenario)}
+
+    but got type:
+
+        dynamic()
+
+    where "scenario" was given the type:
+
+        # type: dynamic()
+        # from: lib/benchee/formatters/tagged_save.ex:73:20
+        scenario
+
+    when defining the variable "scenario", you must also pattern match on "%Benchee.Scenario{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 74 │     %Scenario{scenario | name: Scenario.display_name(scenario)}
+    │     ~
+    │
+    └─ lib/benchee/formatters/tagged_save.ex:74:5: Benchee.Formatters.TaggedSave.update_name/1
+
+    warning: a struct for Benchee.Suite is expected on struct update:
+
+        %Benchee.Suite{suite | scenarios: calculate_relative_statistics(suite.scenarios)}
+
+    but got type:
+
+        dynamic()
+
+    where "suite" was given the type:
+
+        # type: dynamic()
+        # from: lib/benchee/relative_statistics.ex:24:27
+        suite
+
+    when defining the variable "suite", you must also pattern match on "%Benchee.Suite{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 25 │     %Suite{suite | scenarios: calculate_relative_statistics(suite.scenarios)}
+    │     ~
+    │
+    └─ lib/benchee/relative_statistics.ex:25:5: Benchee.RelativeStatistics.relative_statistics/1
+
+    warning: a struct for Benchee.Benchmark.ScenarioContext is expected on struct update:
+
+        %Benchee.Benchmark.ScenarioContext{
+          scenario_context
+          | function_call_overhead: function_call_overhead
+        }
+
+    but got type:
+
+        dynamic()
+
+    where "scenario_context" was given the type:
+
+        # type: dynamic()
+        # from: lib/benchee/benchmark/runner.ex:35:32
+        scenario_context
+
+    when defining the variable "scenario_context", you must also pattern match on "%Benchee.Benchmark.ScenarioContext{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 47 │     scenario_context = %ScenarioContext{
+    │                        ~
+    │
+    └─ lib/benchee/benchmark/runner.ex:47:24: Benchee.Benchmark.Runner.run_scenarios/2
+
+     warning: a struct for Benchee.Scenario is expected on struct update:
+
+         %Benchee.Scenario{scenario | function: nil, input: nil}
+
+     but got type:
+
+         dynamic()
+
+     where "scenario" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/formatter.ex:200:23
+         scenario
+
+     when defining the variable "scenario", you must also pattern match on "%Benchee.Scenario{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 201 │     %Scenario{scenario | function: nil, input: nil}
+     │     ~
+     │
+     └─ lib/benchee/formatter.ex:201:5: Benchee.Formatter.scrub_scenario/1
+
+    warning: a struct for Benchee.Statistics is expected on struct update:
+
+        %Benchee.Statistics{
+          statistics
+          | relative_more: zero_safe_division(statistics.average, reference_statistics.average),
+            relative_less: zero_safe_division(reference_statistics.average, statistics.average),
+            absolute_difference: statistics.average - reference_statistics.average
+        }
+
+    but got type:
+
+        dynamic()
+
+    where "statistics" was given the type:
+
+        # type: dynamic()
+        # from: lib/benchee/relative_statistics.ex:88:32
+        statistics
+
+    when defining the variable "statistics", you must also pattern match on "%Benchee.Statistics{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 89 │     %Statistics{
+    │     ~
+    │
+    └─ lib/benchee/relative_statistics.ex:89:5: Benchee.RelativeStatistics.add_relative_statistics/2
+
+     warning: a struct for Benchee.Scenario is expected on struct update:
+
+         %Benchee.Scenario{
+           scenario
+           | run_time_data: %Benchee.CollectionData{scenario.run_time_data | statistics: run_time_stats},
+             memory_usage_data: %Benchee.CollectionData{
+               scenario.memory_usage_data
+               | statistics: memory_stats
+             },
+             reductions_data: %Benchee.CollectionData{
+               scenario.reductions_data
+               | statistics: reductions_stats
+             }
+         }
+
+     but got type:
+
+         dynamic()
+
+     where "scenario" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/statistics.ex
+         {scenario, {run_time_stats, memory_stats, reductions_stats}}
+
+     when defining the variable "scenario", you must also pattern match on "%Benchee.Scenario{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 204 │       %Scenario{
+     │       ~
+     │
+     └─ lib/benchee/statistics.ex:204:7: Benchee.Statistics.update_scenarios_with_statistics/2
+
+     warning: a struct for Benchee.Benchmark.ScenarioContext is expected on struct update:
+
+         %Benchee.Benchmark.ScenarioContext{scenario_context | scenario_input: scenario_input}
+
+     but got type:
+
+         dynamic()
+
+     where "scenario_context" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/benchmark/runner.ex:99:35
+         scenario_context
+
+     when defining the variable "scenario_context", you must also pattern match on "%Benchee.Benchmark.ScenarioContext{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 101 │     scenario_context = %ScenarioContext{scenario_context | scenario_input: scenario_input}
+     │                        ~
+     │
+     └─ lib/benchee/benchmark/runner.ex:101:24: Benchee.Benchmark.Runner.measure_scenario/2
+
+     warning: a struct for Benchee.Benchmark.ScenarioContext is expected on struct update:
+
+         %Benchee.Benchmark.ScenarioContext{
+           scenario_context
+           | current_time: current_time(),
+             end_time: end_time,
+             num_iterations: num_iterations
+         }
+
+     but got type:
+
+         dynamic()
+
+     where "scenario_context" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/benchmark/runner.ex:221:35
+         scenario_context
+
+     when defining the variable "scenario_context", you must also pattern match on "%Benchee.Benchmark.ScenarioContext{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 228 │     new_context = %ScenarioContext{
+     │                   ~
+     │
+     └─ lib/benchee/benchmark/runner.ex:228:19: Benchee.Benchmark.Runner.measure_runtimes/4
+
+     warning: a struct for Benchee.Statistics is expected on struct update:
+
+         %Benchee.Statistics{statistics | ips: ips, std_dev_ips: standard_dev_ips}
+
+     but got type:
+
+         dynamic()
+
+     where "statistics" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/statistics.ex:263:16
+         statistics
+
+     when defining the variable "statistics", you must also pattern match on "%Benchee.Statistics{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 267 │     %__MODULE__{
+     │     ~
+     │
+     └─ lib/benchee/statistics.ex:267:5: Benchee.Statistics.add_ips/1
+
+     warning: a struct for Benchee.Benchmark.ScenarioContext is expected on struct update:
+
+         %Benchee.Benchmark.ScenarioContext{scenario_context | current_time: current_time()}
+
+     but got type:
+
+         dynamic()
+
+     where "scenario_context" was given the type:
+
+         # type: dynamic()
+         # from: lib/benchee/benchmark/runner.ex:259:31
+         scenario_context
+
+     when defining the variable "scenario_context", you must also pattern match on "%Benchee.Benchmark.ScenarioContext{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 261 │     updated_context = %ScenarioContext{scenario_context | current_time: current_time()}
+     │                       ~
+     │
+     └─ lib/benchee/benchmark/runner.ex:261:23: Benchee.Benchmark.Runner.do_benchmark/4
+
+    warning: a struct for Benchee.Benchmark.ScenarioContext is expected on struct update:
+
+        %Benchee.Benchmark.ScenarioContext{scenario_context | scenario_input: scenario_input}
+
+    but got type:
+
+        dynamic()
+
+    where "scenario_context" was given the type:
+
+        # type: dynamic()
+        # from: lib/benchee/benchmark/run_once.ex:12:21
+        scenario_context
+
+    when defining the variable "scenario_context", you must also pattern match on "%Benchee.Benchmark.ScenarioContext{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 14 │     scenario_context = %ScenarioContext{scenario_context | scenario_input: scenario_input}
+    │                        ~
+    │
+    └─ lib/benchee/benchmark/run_once.ex:14:24: Benchee.Benchmark.RunOnce.run/3
+
+    warning: a struct for Benchee.Suite is expected on struct update:
+
+        %Benchee.Suite{suite | scenarios: scenarios ++ loaded}
+
+    but got type:
+
+        dynamic(%{..., configuration: %{..., load: term()}, scenarios: term()})
+
+    where "suite" was given the type:
+
+        # type: dynamic(%{..., configuration: %{..., load: term()}, scenarios: term()})
+        # from: lib/benchee/scenario_loader.ex:18:18
+        suite = %{configuration: %{load: load_path}, scenarios: scenarios}
+
+    when defining the variable "suite", you must also pattern match on "%Benchee.Suite{}".
+
+    hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+        user = some_function()
+        %User{user | name: "John Doe"}
+
+    it is enough to write:
+
+        %User{} = user = some_function()
+        %{user | name: "John Doe"}
+
+    typing violation found at:
+    │
+ 20 │     %Suite{suite | scenarios: scenarios ++ loaded}
+    │     ~
+    │
+    └─ lib/benchee/scenario_loader.ex:20:5: Benchee.ScenarioLoader.load/1
+
+     warning: a struct for Benchee.Configuration is expected on struct update:
+
+         %Benchee.Configuration{config | formatters: formatters}
+
+     but got type:
+
+         dynamic(%{..., save: term()})
+
+     where "config" was given the type:
+
+         # type: dynamic(%{..., save: term()})
+         # from: lib/benchee/configuration.ex:343:38
+         config = %{save: save_values}
+
+     when defining the variable "config", you must also pattern match on "%Benchee.Configuration{}".
+
+     hint: given pattern matching is enough to catch typing errors, you may optionally convert the struct update into a map update. For example, instead of:
+
+         user = some_function()
+         %User{user | name: "John Doe"}
+
+     it is enough to write:
+
+         %User{} = user = some_function()
+         %{user | name: "John Doe"}
+
+     typing violation found at:
+     │
+ 347 │     %__MODULE__{config | formatters: formatters}
+     │     ~
+     │
+     └─ lib/benchee/configuration.ex:347:5: Benchee.Configuration.save_option_conversion/1
+
+Generated benchee app
+==> nimble_parsec
+Compiling 4 files (.ex)
+Generated nimble_parsec app
+==> makeup
+Compiling 15 files (.ex)
+Generated makeup app
+==> makeup_elixir
+Compiling 6 files (.ex)
+Generated makeup_elixir app
+==> makeup_erlang
+Compiling 4 files (.ex)
+Generated makeup_erlang app
+==> ex_doc
+Compiling 26 files (.ex)
+Generated ex_doc app
+==> dialyxir
+Compiling 67 files (.ex)
+Generated dialyxir app
+==> ordered_collections
+Compiling 11 files (.ex)
+Generated ordered_collections app
+Traversal candidates: 32 elements, 23 jobs
+Traversal candidates: 1000 elements, 23 jobs
+Traversal candidates: 20000 elements, 23 jobs
+Traversal candidates: 100000 elements, 23 jobs
+Saved /tmp/ordered-enumeration-review/final/baseline.json

@@ -32,10 +32,6 @@ defimpl Collectable, for: OrderedCollections.SortedMap do
       # On halt, simply return :ok.
       _sorted_map_acc, :halt ->
         :ok
-
-      # Handle suspend if needed.
-      sorted_map_acc, {:suspend, _} ->
-        sorted_map_acc
     end
 
     {sorted_map, collected_fun}

@@ -1,0 +1,59 @@
+$ mix dialyzer
+Finding suitable PLTs
+Checking PLT...
+[:benchee, :compiler, :deep_merge, :elixir, :kernel, :logger, :ordered_collections, :statistex, :stdlib]
+PLT is up to date!
+No :ignore_warnings opt specified in mix.exs and default does not exist.
+
+Starting Dialyzer
+[
+  check_plt: false,
+  init_plt: ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/dialyxir_erlang-29.0.1_elixir-1.19.5_deps-dev.plt",
+  files: [~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Inspect.OrderedCollections.SortedMap.beam",
+   ...],
+  ...
+]
+Total errors: 1, Skipped: 0, Unnecessary Skips: 0
+done in 0m1.05s
+Please file a bug in https://github.com/jeremyjh/dialyxir/issues with this message.
+
+Unknown error occurred: %FunctionClauseError{module: Dialyxir.Warnings.CallWithoutOpaque, function: :format_long, arity: 1, kind: nil, args: nil, clauses: nil}
+
+
+Legacy warning:
+lib/ordered_collections/enumerable/sorted_set.ex:23:35: The call 'Elixir.Enumerable.OrderedCollections.SortedSet':reduce(_set@1::#{'__struct__':='Elixir.OrderedCollections.SortedSet', _=>_},_capture@1::any(),_fun@1::any()) does not have an opaque term of type 'Elixir.OrderedCollections.SortedSet':t() as 1st argument
+________________________________________________________________________________
+done (warnings were emitted)
+Halting VM with exit status 2
+
+EXIT_STATUS=2
+
+After private reduce_set opaque inference repair
+$ mix dialyzer
+Finding suitable PLTs
+Checking PLT...
+[:benchee, :compiler, :deep_merge, :elixir, :kernel, :logger, :ordered_collections, :statistex, :stdlib]
+PLT is up to date!
+No :ignore_warnings opt specified in mix.exs and default does not exist.
+
+Starting Dialyzer
+[
+  check_plt: false,
+  init_plt: ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/dialyxir_erlang-29.0.1_elixir-1.19.5_deps-dev.plt",
+  files: [~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Collectable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedMap.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Enumerable.OrderedCollections.SortedSet.beam",
+   ~c"/Users/jeffreybaird/src/ordered_collections/_build/dev/lib/ordered_collections/ebin/Elixir.Inspect.OrderedCollections.SortedMap.beam",
+   ...],
+  ...
+]
+Total errors: 0, Skipped: 0, Unnecessary Skips: 0
+done in 0m1.05s
+done (passed successfully)
+
+EXIT_STATUS=0

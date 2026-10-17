@@ -4,11 +4,11 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
   @type element() :: any()
 
   @doc """
-  Reduces the SortedSet using :gb_sets.fold.
+  Reduces the SortedSet in sorted order using Erlang's public fold operation.
 
-  This implementation unwraps the accumulator from the `{:cont, acc}` tuple,
-  passes a plain accumulator to :gb_sets.fold/3, and then wraps the result back
-  in `{:cont, result}`.
+  Supports continuation and early halt. After suspension, a public Erlang iterator
+  resumes immediately after the consumed element. Exhaustion returns
+  `{:done, accumulator}`.
 
   ## Examples
 
@@ -16,35 +16,51 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
       iex> Enum.reduce(set, 0, fn x, acc -> x + acc end)
       6
   """
-  @spec reduce(OrderedCollections.SortedSet.t(), {:cont, any()}, any()) ::
-          {:cont, any()}
-          | {:halted, any()}
-          | {:suspended, any(), (any() -> {any(), any()} | {any(), any(), any()})}
-  def reduce(%SortedSet{set: set}, {:cont, acc}, fun) do
-    result =
-      :gb_sets.fold(
-        fn element, acc ->
-          case fun.(element, acc) do
-            {:cont, new_acc} -> new_acc
-          end
-        end,
-        acc,
-        set
-      )
+  @spec reduce(SortedSet.t(), Enumerable.acc(), Enumerable.reducer()) :: Enumerable.result()
+  def reduce(%SortedSet{set: set}, acc, fun), do: reduce_set(set, acc, fun)
 
-    {:cont, result}
+  defp reduce_set(_set, {:halt, acc}, _fun), do: {:halted, acc}
+
+  defp reduce_set(set, {:suspend, acc}, fun),
+    do: {:suspended, acc, &reduce_set(set, &1, fun)}
+
+  defp reduce_set(set, {:cont, acc}, fun) do
+    # Only our private throws interrupt the fold; callback exceptions, exits,
+    # and arbitrary throws must propagate unchanged.
+    tag = make_ref()
+
+    try do
+      result =
+        :gb_sets.fold(
+          fn element, acc ->
+            case fun.(element, acc) do
+              {:cont, next_acc} -> next_acc
+              {:halt, next_acc} -> throw({tag, :halt, next_acc})
+              {:suspend, next_acc} -> throw({tag, :suspend, element, next_acc})
+            end
+          end,
+          acc,
+          set
+        )
+
+      {:done, result}
+    catch
+      {^tag, :halt, halted_acc} ->
+        {:halted, halted_acc}
+
+      {^tag, :suspend, element, suspended_acc} ->
+        {_stored, iterator} = :gb_sets.next(:gb_sets.iterator_from(element, set))
+        {:suspended, suspended_acc, &reduce_iterator(iterator, &1, fun)}
+    end
   end
-
-  def reduce(_, {:halt, acc}, _fun), do: {:halted, acc}
-  def reduce(set, {:suspend, acc}, fun), do: {:suspended, acc, &reduce(set, &1, fun)}
 
   def count(%SortedSet{set: set}) do
     {:ok, :gb_sets.size(set)}
   end
 
-  @spec member?(OrderedCollections.SortedSet.t(), any()) :: {:ok, boolean()}
   @doc """
-  Implementation of member? for the Enumerable implementation of SortedSet.
+  Checks membership with strict equality (`===`). Unlike `SortedSet.member?/2`,
+  numeric equivalents must match the stored representation.
 
   ## Examples
 
@@ -53,14 +69,19 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
       true
       iex> Enum.member?(set, 4)
       false
+      iex> Enum.member?(set, 1.0)
+      false
   """
   @spec member?(OrderedCollections.SortedSet.t(), any()) :: {:ok, boolean()}
   def member?(%SortedSet{set: set}, value) do
-    {:ok, :gb_sets.is_member(value, set)}
+    case :gb_sets.next(:gb_sets.iterator_from(value, set)) do
+      {stored, _iterator} -> {:ok, stored === value}
+      :none -> {:ok, false}
+    end
   end
 
   @doc """
-  Implementation of slice for the Enumerable implementation of SortedSet.
+  Returns a bounded iterator slicer supporting start, length, and step.
 
   ## Examples
 
@@ -70,13 +91,48 @@ defimpl Enumerable, for: OrderedCollections.SortedSet do
 
   """
   def slice(%SortedSet{set: set}) do
-    sorted_list = :gb_sets.to_list(set)
-    count = length(sorted_list)
+    slicer = fn
+      _start, 0, _step ->
+        []
 
-    slicer = fn start, length, _step ->
-      Enum.slice(sorted_list, start, length)
+      start, length, step ->
+        set
+        |> :gb_sets.iterator()
+        |> skip(start)
+        |> take_slice(length, step, [])
     end
 
-    {:ok, count, slicer}
+    {:ok, :gb_sets.size(set), slicer}
+  end
+
+  defp reduce_iterator(_iterator, {:halt, acc}, _fun), do: {:halted, acc}
+
+  defp reduce_iterator(iterator, {:suspend, acc}, fun),
+    do: {:suspended, acc, &reduce_iterator(iterator, &1, fun)}
+
+  defp reduce_iterator(iterator, {:cont, acc}, fun) do
+    case :gb_sets.next(iterator) do
+      :none -> {:done, acc}
+      {element, next} -> reduce_iterator(next, fun.(element, acc), fun)
+    end
+  end
+
+  defp skip(iterator, 0), do: iterator
+
+  defp skip(iterator, count) do
+    case :gb_sets.next(iterator) do
+      :none -> iterator
+      {_, next} -> skip(next, count - 1)
+    end
+  end
+
+  defp take_slice(_iterator, 0, _step, acc), do: Enum.reverse(acc)
+
+  defp take_slice(iterator, length, step, acc) do
+    case :gb_sets.next(iterator) do
+      :none -> Enum.reverse(acc)
+      {element, _next} when length == 1 -> Enum.reverse([element | acc])
+      {element, next} -> take_slice(skip(next, step - 1), length - 1, step, [element | acc])
+    end
   end
 end

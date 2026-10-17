@@ -16,12 +16,9 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
       iex> Enum.reduce(map, [], fn {k, _v}, acc -> [k | acc] end) |> Enum.reverse()
       [:a, :b, :c]
   """
-  @spec reduce(OrderedCollections.SortedMap.t(), {:cont, any()}, any()) ::
-          {:cont, any()}
-          | {:halted, any()}
-          | {:suspended, any(), (any() -> {any(), any()} | {any(), any(), any()})}
-  def reduce(%SortedMap{tree: {_, root_node}}, {:cont, acc}, fun) do
-    traverse_tree(root_node, acc, fun)
+  @spec reduce(SortedMap.t(), Enumerable.acc(), Enumerable.reducer()) :: Enumerable.result()
+  def reduce(%SortedMap{tree: tree}, acc, fun) do
+    reduce_iterator(:gb_trees.iterator(tree), acc, fun)
   end
 
   @doc """
@@ -45,7 +42,7 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
   Checks for membership of a given key–value pair in the SortedMap.
 
   This function is invoked by `Enum.member?/2`. It returns `{:ok, true}` if the key exists
-  in the map (ignoring the value), otherwise `{:ok, false}`.
+  and both the stored key and value match strictly (`===`), otherwise `{:ok, false}`.
 
   ## Examples
 
@@ -54,19 +51,26 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
       true
       iex> Enum.member?(map, {:c, 3})
       false
+      iex> Enum.member?(map, {:a, 1.0})
+      false
   """
-  @spec member?(OrderedCollections.SortedMap.t(), {any(), any()}) :: {:ok, boolean()}
-  def member?(%SortedMap{tree: tree}, {key, _value}) do
-    {:ok, :gb_trees.is_defined(key, tree)}
+  @spec member?(OrderedCollections.SortedMap.t(), any()) :: {:ok, boolean()}
+  def member?(%SortedMap{tree: tree}, {key, _value} = pair) do
+    case :gb_trees.next(:gb_trees.iterator_from(key, tree)) do
+      {stored_key, stored_value, _iterator} -> {:ok, {stored_key, stored_value} === pair}
+      :none -> {:ok, false}
+    end
   end
+
+  def member?(%SortedMap{}, _other), do: {:ok, false}
 
   @doc """
   Implements index-based slicing for the SortedMap.
 
   This function is used by `Enum.slice/2` to extract a subrange from the SortedMap.
   It returns a tuple `{:ok, count, slicer_fun}` where `count` is the total number of elements,
-  and `slicer_fun` is a function that accepts `(start, length, step)` (with step ignored) and
-  returns a list of key–value pairs starting at that index.
+  and `slicer_fun` accepts `(start, length, step)` and returns the requested
+  key–value pairs without traversing the remainder of the map.
 
   ## Examples
 
@@ -77,58 +81,64 @@ defimpl Enumerable, for: OrderedCollections.SortedMap do
       [a: 1, b: 2, c: 3]
   """
   @spec slice(OrderedCollections.SortedMap.t()) :: {:ok, any(), (any(), any(), any() -> list())}
-  def slice(%SortedMap{tree: {size, root}}) do
-    slicer = fn start, length, _step ->
-      {_, acc, _remaining} = collect_slice(root, start, length, 0, [])
-      Enum.reverse(acc)
+  def slice(%SortedMap{tree: tree}) do
+    slicer = fn
+      _start, 0, _step ->
+        []
+
+      start, length, step ->
+        tree
+        |> :gb_trees.iterator()
+        |> skip(start)
+        |> take_slice(length, step, [])
     end
 
-    {:ok, size, slicer}
+    {:ok, :gb_trees.size(tree), slicer}
   end
 
-  defp traverse_tree(nil, acc, _fun), do: {:cont, acc}
+  defp reduce_iterator(_iterator, {:halt, acc}, _fun), do: {:halted, acc}
 
-  defp traverse_tree({key, value, left, right}, acc, fun) do
-    case traverse_tree(left, acc, fun) do
-      {:cont, acc} ->
+  defp reduce_iterator(iterator, {:suspend, acc}, fun),
+    do: {:suspended, acc, &reduce_iterator(iterator, &1, fun)}
+
+  defp reduce_iterator(iterator, {:cont, acc}, fun) do
+    reduce_cont(iterator, acc, fun)
+  end
+
+  defp reduce_cont(iterator, acc, fun) do
+    case :gb_trees.next(iterator) do
+      :none ->
+        {:done, acc}
+
+      {key, value, next} ->
         case fun.({key, value}, acc) do
-          {:cont, new_acc} -> traverse_tree(right, new_acc, fun)
-          {:halt, final_acc} -> {:halted, final_acc}
-          {:suspend, suspended_acc} -> {:suspended, suspended_acc, &traverse_tree(right, &1, fun)}
+          {:cont, next_acc} -> reduce_cont(next, next_acc, fun)
+          signal -> reduce_iterator(next, signal, fun)
         end
-
-      other ->
-        other
     end
   end
 
-  # Base case: If we hit a nil node, return the current index, accumulator, and remaining length.
-  defp collect_slice(nil, _start, length, index, acc) do
-    {index, acc, length}
+  defp skip(iterator, 0), do: iterator
+
+  defp skip(iterator, count) do
+    case :gb_trees.next(iterator) do
+      :none -> iterator
+      {_, _, next} -> skip(next, count - 1)
+    end
   end
 
-  # In-order traversal: traverse left, process current node, then traverse right.
-  defp collect_slice({key, value, left, right}, start, length, index, acc) do
-    # Traverse the left subtree first.
-    {index, acc, length} = collect_slice(left, start, length, index, acc)
+  defp take_slice(_iterator, 0, _step, acc), do: Enum.reverse(acc)
 
-    new_index = index + 1
+  defp take_slice(iterator, length, step, acc) do
+    case :gb_trees.next(iterator) do
+      :none ->
+        Enum.reverse(acc)
 
-    {acc, length} =
-      if new_index > start and length > 0 do
-        # We are past the start index and still need elements, so collect the current node.
-        {[{key, value} | acc], length - 1}
-      else
-        # Otherwise, leave the accumulator and length unchanged.
-        {acc, length}
-      end
+      {key, value, _next} when length == 1 ->
+        Enum.reverse([{key, value} | acc])
 
-    # If we've collected the required number of elements, stop traversing further.
-    if length == 0 do
-      {new_index, acc, length}
-    else
-      # Otherwise, continue with the right subtree.
-      collect_slice(right, start, length, new_index, acc)
+      {key, value, next} ->
+        take_slice(skip(next, step - 1), length - 1, step, [{key, value} | acc])
     end
   end
 end

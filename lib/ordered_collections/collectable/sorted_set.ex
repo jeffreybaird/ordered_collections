@@ -9,7 +9,6 @@ defimpl Collectable, for: OrderedCollections.SortedSet do
   - `{:cont, element}`: Adds the element to the set
   - `:done`: Returns the final set
   - `:halt`: Returns `:ok`
-  - `{:suspend, _}`: Returns the current set unchanged
 
   ## Examples
 
@@ -21,35 +20,30 @@ defimpl Collectable, for: OrderedCollections.SortedSet do
 
       iex> {initial, collector} = Collectable.into(SortedSet.new())
       iex> acc = collector.(initial, {:cont, 1})
-      iex> acc = collector.(acc, {:suspend, []})
       iex> acc = collector.(acc, {:cont, 2})
       iex> result = collector.(acc, :done)
       iex> SortedSet.to_list(result)
       [1, 2]
   """
   @spec into(OrderedCollections.SortedSet.t()) ::
-          {OrderedCollections.SortedSet.t(),
-           (OrderedCollections.SortedSet.t(),
+          {:gb_sets.set(),
+           (:gb_sets.set(),
             :done
             | :halt
-            | {:cont, any()}
-            | {:suspend, any()} ->
-              OrderedCollections.SortedSet.t() | :ok)}
-  def into(sorted_set) do
+            | {:cont, any()} ->
+              :gb_sets.set() | OrderedCollections.SortedSet.t() | :ok)}
+  def into(%SortedSet{set: set}) do
     collected_fun = fn
-      sorted_set_acc, {:cont, elm} ->
-        SortedSet.add(sorted_set_acc, elm)
+      set_acc, {:cont, elm} ->
+        :gb_sets.add(elm, set_acc)
 
-      sorted_set_acc, :done ->
-        sorted_set_acc
+      set_acc, :done ->
+        %SortedSet{set: set_acc}
 
-      _sorted_set_acc, :halt ->
+      _set_acc, :halt ->
         :ok
-
-      sorted_set_acc, {:suspend, _} ->
-        sorted_set_acc
     end
 
-    {sorted_set, collected_fun}
+    {set, collected_fun}
   end
 end
